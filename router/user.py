@@ -8,7 +8,7 @@ from fastapi import (
 )
 from sqlmodel import select
 
-from core.session import SessionDep
+from core.session import PGSessionDep
 from model.user import User
 
 
@@ -16,7 +16,7 @@ router = APIRouter(prefix="/user")
 
 
 @router.post("/create")
-def create_user(user: User, session: SessionDep) -> User:
+def create_user(user: User, session: PGSessionDep) -> User:
     user = User(
         username=user.username,
         password=hashlib.sha256(user.password.encode()).hexdigest()
@@ -30,7 +30,7 @@ def create_user(user: User, session: SessionDep) -> User:
 
 @router.get("/list/")
 def read_users(
-    session: SessionDep,
+    session: PGSessionDep,
     offset: int = 0,
     limit: Annotated[int, Query(le=100)] = 100,
 ) -> list[User]:
@@ -39,7 +39,7 @@ def read_users(
 
 
 @router.get("/{user_id}")
-def read_user(user_id: int, session: SessionDep) -> User:
+def read_user(user_id: int, session: PGSessionDep) -> User:
     user = session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -47,7 +47,7 @@ def read_user(user_id: int, session: SessionDep) -> User:
 
 
 @router.delete("/{user_id}")
-def delete_user(user_id: int, session: SessionDep):
+def delete_user(user_id: int, session: PGSessionDep):
     user = session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

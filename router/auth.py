@@ -9,7 +9,7 @@ from fastapi import (
 from sqlmodel import select
 
 from core.secret import JWT_SECRET_KEY
-from core.session import SessionDep
+from core.session import PGSessionDep
 from model.user import User
 
 
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/auth")
 
 
 @router.post("/authenticate")
-def authenticate(user: User, session: SessionDep) -> str:
+def authenticate(user: User, session: PGSessionDep) -> str:
     username = user.username
     password = hashlib.sha256(user.password.encode()).hexdigest()
 

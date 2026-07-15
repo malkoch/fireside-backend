@@ -3,7 +3,7 @@ import json
 import confluent_kafka
 from fastapi import APIRouter
 
-from core.session import SessionDep
+from core.session import PGSessionDep
 from model.message import Message
 
 
@@ -16,7 +16,7 @@ producer = confluent_kafka.Producer(
 
 
 @router.post("/create")
-def create(message: Message, session: SessionDep) -> Message:
+def create(message: Message, session: PGSessionDep) -> Message:
     session.add(message)
     session.commit()
     session.refresh(message)

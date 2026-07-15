@@ -9,7 +9,7 @@ from fastapi import (
 )
 from sqlmodel import select
 
-from core.session import SessionDep
+from core.session import PGSessionDep
 from model.campfire import Campfire
 
 
@@ -22,19 +22,19 @@ producer = confluent_kafka.Producer(
 
 
 @router.post("/create")
-def create(campfire: Campfire, session: SessionDep) -> Campfire:
+def create(campfire: Campfire, session: PGSessionDep) -> Campfire:
     session.add(campfire)
     session.commit()
     session.refresh(campfire)
 
-    producer.produce('campfire.created', json.dumps({'campfire': campfire.id}))
+    producer.produce('campfire.created', json.dumps({'name': campfire.name}))
 
     return campfire
 
 
 @router.post("/join")
 def join(campfire_id: int, user_id: int):
-    producer.produce('campfire.joined', json.dumps({'campfire': campfire_id, 'user': user_id}))
+    producer.produce('campfire.user.joined', json.dumps({'campfire': campfire_id, 'user': user_id}))
 
     return {'ok': True}
 
@@ -42,7 +42,7 @@ def join(campfire_id: int, user_id: int):
 @router.get("/list")
 def read(
     fellowship_id: int,
-    session: SessionDep,
+    session: PGSessionDep,
     offset: int = 0,
     limit: Annotated[int, Query(le=100)] = 100,
 ) -> list[Campfire]:
@@ -51,7 +51,7 @@ def read(
 
 
 @router.delete("/{name}")
-def delete(name: str, session: SessionDep):
+def delete(name: str, session: PGSessionDep):
     campfire = session.exec(select(Campfire).where(Campfire.name == name)).first()
     if not campfire:
         raise HTTPException(status_code=404, detail="User not found")

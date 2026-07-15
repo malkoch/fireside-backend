@@ -13,7 +13,7 @@ consumer = confluent_kafka.Consumer(
 redis_client = redis.Redis(host='localhost', port=6379)
 
 try:
-    consumer.subscribe(['fellowship.created', 'fellowship.joined'])
+    consumer.subscribe(['fellowship.created', 'fellowship.user.joined'])
     while True:
         message = consumer.poll(timeout=1.)
         if message is None:
@@ -24,7 +24,7 @@ try:
 
         if topic == 'fellowship.created':
             ...
-        elif topic == 'fellowship.joined':
+        elif topic == 'fellowship.user.joined':
             d = json.loads(value)
             fellowship = d['fellowship']
             user = d['user']

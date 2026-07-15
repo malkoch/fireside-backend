@@ -10,9 +10,9 @@ from sqlmodel import (
 postgresql_engine = create_engine('postgresql://postgres:mysecretpassword@localhost:5432/fireside')
 
 
-def get_session():
+def get_pg_session():
     with Session(postgresql_engine) as session:
         yield session
 
 
-SessionDep = Annotated[Session, Depends(get_session)]
+PGSessionDep = Annotated[Session, Depends(get_pg_session)]

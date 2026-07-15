@@ -9,7 +9,7 @@ from fastapi import (
 )
 from sqlmodel import select
 
-from core.session import SessionDep
+from core.session import PGSessionDep
 from model.fellowship import (
     Fellowship,
     FellowshipMember
@@ -26,7 +26,7 @@ producer = confluent_kafka.Producer(
 
 
 @router.post("/create")
-def create(fellowship: Fellowship, session: SessionDep) -> Fellowship:
+def create(fellowship: Fellowship, session: PGSessionDep) -> Fellowship:
     session.add(fellowship)
     session.commit()
     session.refresh(fellowship)
@@ -37,19 +37,19 @@ def create(fellowship: Fellowship, session: SessionDep) -> Fellowship:
 
 
 @router.post("/join")
-def join(fellowship_member: FellowshipMember, session: SessionDep) -> FellowshipMember:
+def join(fellowship_member: FellowshipMember, session: PGSessionDep) -> FellowshipMember:
     session.add(fellowship_member)
     session.commit()
     session.refresh(fellowship_member)
 
-    producer.produce('fellowship.joined', json.dumps({'fellowship': fellowship_member.fellowship_id, 'user': fellowship_member.user_id}))
+    producer.produce('fellowship.user.joined', json.dumps({'fellowship': fellowship_member.fellowship_id, 'user': fellowship_member.user_id}))
 
     return fellowship_member
 
 
 @router.get("/list")
 def read(
-    session: SessionDep,
+    session: PGSessionDep,
     offset: int = 0,
     limit: Annotated[int, Query(le=100)] = 100,
 ) -> list[Fellowship]:
@@ -58,7 +58,7 @@ def read(
 
 
 @router.delete("/{name}")
-def delete(name: str, session: SessionDep):
+def delete(name: str, session: PGSessionDep):
     fellowship = session.exec(select(Fellowship).where(Fellowship.name == name)).first()
     if not fellowship:
         raise HTTPException(status_code=404, detail="User not found")
