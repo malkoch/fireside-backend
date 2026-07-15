@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 import json
 
 import jwt
@@ -52,7 +53,7 @@ async def redis_listener():
             continue
 
         packet = json.loads(msg['data'])
-        await manager.send(packet['user'], packet['body'])
+        await manager.send(packet['user'], packet)
 
 
 @app.on_event("startup")
@@ -64,7 +65,6 @@ async def on_startup():
 
 @app.websocket('/gateway')
 async def gateway(ws: WebSocket):
-    # validate token
     token = ws.query_params['token']
     payload = jwt.decode(token, key=secret.JWT_SECRET_KEY, algorithms=['HS256'])
 
@@ -76,7 +76,10 @@ async def gateway(ws: WebSocket):
     try:
         while True:
             recv = await ws.receive_text()
-            print(f'user:{user_id}:recv', recv)
+
+            packet = json.loads(recv)
+            if packet['op'] == 'HEARTBEAT':
+                await redis_client.set(f'user:{user_id}:heartbeat', datetime.datetime.utcnow().isoformat())
     except WebSocketDisconnect:
         await manager.disconnect(user_id)
         await redis_client.delete(f'user:{user_id}:gateway')
