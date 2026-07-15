@@ -29,6 +29,7 @@ def authenticate(user: User, session: SessionDep) -> str:
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
     payload = {
+        'user': db_user.id,
         'sub': username,
         'role': 'user',
         'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)

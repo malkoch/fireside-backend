@@ -1,5 +1,7 @@
+import json
 from typing import Annotated
 
+import confluent_kafka
 from fastapi import (
     APIRouter,
     HTTPException,
@@ -12,14 +14,29 @@ from model.campfire import Campfire
 
 
 router = APIRouter(prefix="/campfire")
+producer = confluent_kafka.Producer(
+    {
+        'bootstrap.servers': 'localhost:9092'
+    }
+)
 
 
 @router.post("/create")
-def create(campfire: Campfire, session: SessionDep) -> str:
+def create(campfire: Campfire, session: SessionDep) -> Campfire:
     session.add(campfire)
     session.commit()
     session.refresh(campfire)
+
+    producer.produce('fellowship.created', json.dumps({'campfire': campfire.id}))
+
     return campfire
+
+
+@router.post("/join")
+def join(campfire_id: int, user_id: int):
+    producer.produce('fellowship.joined', json.dumps({'campfire': campfire_id, 'user': user_id}))
+
+    return {'ok': True}
 
 
 @router.get("/list")
