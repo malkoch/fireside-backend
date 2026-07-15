@@ -27,14 +27,14 @@ def create(campfire: Campfire, session: SessionDep) -> Campfire:
     session.commit()
     session.refresh(campfire)
 
-    producer.produce('fellowship.created', json.dumps({'campfire': campfire.id}))
+    producer.produce('campfire.created', json.dumps({'campfire': campfire.id}))
 
     return campfire
 
 
 @router.post("/join")
 def join(campfire_id: int, user_id: int):
-    producer.produce('fellowship.joined', json.dumps({'campfire': campfire_id, 'user': user_id}))
+    producer.produce('campfire.joined', json.dumps({'campfire': campfire_id, 'user': user_id}))
 
     return {'ok': True}
 
@@ -50,9 +50,9 @@ def read(
     return objects
 
 
-@router.delete("/{campfire_id}")
-def delete(campfire_id: int, session: SessionDep):
-    campfire = session.get(Campfire, campfire_id)
+@router.delete("/{name}")
+def delete(name: str, session: SessionDep):
+    campfire = session.exec(select(Campfire).where(Campfire.name == name)).first()
     if not campfire:
         raise HTTPException(status_code=404, detail="User not found")
     session.delete(campfire)

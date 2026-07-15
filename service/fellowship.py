@@ -22,7 +22,6 @@ try:
         topic = message.topic()
         value = message.value().decode('utf-8') if message.value() else None
 
-        print(f'{topic=} {value=}')
         if topic == 'fellowship.created':
             ...
         elif topic == 'fellowship.joined':

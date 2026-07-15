@@ -1,23 +1,23 @@
 import asyncio
 import json
-import socket
-import uuid
 
 import jwt
-import redis
 from fastapi import (
     FastAPI,
     WebSocket,
     WebSocketDisconnect
 )
+from redis import asyncio as redis
 from sqlmodel import SQLModel
 
 from core import secret
+from core.secret import GATEWAY_ID
 from core.websocket import manager
 from router import (
     auth,
     campfire,
     fellowship,
+    message,
     user
 )
 
@@ -32,9 +32,8 @@ app = FastAPI()
 app.include_router(auth.router)
 app.include_router(campfire.router)
 app.include_router(fellowship.router)
+app.include_router(message.router)
 app.include_router(user.router)
-
-GATEWAY_ID = f'{socket.gethostname()}-{uuid.uuid4()}'
 
 redis_client = redis.Redis(host='localhost', port=6379)
 
@@ -42,14 +41,18 @@ redis_client = redis.Redis(host='localhost', port=6379)
 async def redis_listener():
     pubsub = redis_client.pubsub()
 
-    pubsub.subscribe(f'gateway:{GATEWAY_ID}')
+    await pubsub.subscribe(f'gateway:{GATEWAY_ID}')
 
-    async for message in pubsub.listen():
-        if message['type'] != 'message':
+    while True:
+        msg = await pubsub.get_message(ignore_subscribe_messages=True, timeout=1.0)
+        if msg is None:
             continue
 
-        packet = json.loads(message['data'])
-        await manager.send(packet['user_id'], packet['payload'])
+        if msg['type'] != 'message':
+            continue
+
+        packet = json.loads(msg['data'])
+        await manager.send(packet['user'], packet['body'])
 
 
 @app.on_event("startup")
@@ -68,7 +71,7 @@ async def gateway(ws: WebSocket):
     user_id = payload['user']
     await manager.connect(user_id, ws)
 
-    redis_client.set(f'user:{user_id}:gateway', GATEWAY_ID)
+    await redis_client.set(f'user:{user_id}:gateway', GATEWAY_ID)
 
     try:
         while True:
@@ -76,4 +79,4 @@ async def gateway(ws: WebSocket):
             print(f'user:{user_id}:recv', recv)
     except WebSocketDisconnect:
         await manager.disconnect(user_id)
-        redis_client.delete(f'user:{user_id}:gateway')
+        await redis_client.delete(f'user:{user_id}:gateway')
