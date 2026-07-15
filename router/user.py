@@ -28,15 +28,6 @@ def create_user(user: User, session: SessionDep) -> User:
     return user
 
 
-@router.post("/login")
-def login_user(user: User, session: SessionDep) -> User:
-    username = user.username
-    password = hashlib.sha256(user.password.encode()).hexdigest()
-
-    db_user = session.exec(select(User).where(User.username == username).where(User.password == password)).first()
-    return db_user
-
-
 @router.get("/list/")
 def read_users(
     session: SessionDep,
