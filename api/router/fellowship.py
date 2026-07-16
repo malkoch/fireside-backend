@@ -44,7 +44,12 @@ security = HTTPBearer()
 
 
 @router.post("/create")
-async def create(fellowship: Fellowship, session: PGSessionDep) -> Fellowship:
+async def create(fellowship: Fellowship, credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)], session: PGSessionDep) -> Fellowship:
+    token = credentials.credentials
+    payload = jwt.decode(token, key=secret.JWT_SECRET_KEY, algorithms=['HS256'])
+
+    fellowship.creator_id = payload['user']
+
     session.add(fellowship)
     session.commit()
     session.refresh(fellowship)

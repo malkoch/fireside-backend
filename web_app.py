@@ -5,6 +5,7 @@ from sqlmodel import SQLModel
 from starlette.middleware.sessions import SessionMiddleware
 
 from web.router import (
+    campfire,
     fellowship,
     home,
     message
@@ -18,6 +19,7 @@ def create_db_and_tables():
 
 
 app = FastAPI()
+app.include_router(campfire.router)
 app.include_router(fellowship.router)
 app.include_router(home.router)
 app.include_router(message.router)

@@ -1,0 +1,37 @@
+{% extends "shared.html" %}
+{% block content %}
+
+<div class="col-lg-12 row">
+    <input type="text" id="message" name="message" value="aaa"/>
+    <button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+    var socket = new WebSocket("ws://127.0.0.1:5000/gateway");
+
+    socket.addEventListener('message', (event) => {
+        console.log('new message from websocket: ' + event.data);
+    });
+
+    setInterval(() => {
+        socket.send(JSON.stringify({'op': 'HEARTBEAT'}));
+    }, 1000);
+
+    function sendMessage() {
+        $.ajax({
+            type: 'POST',
+            url: '/message/send',
+            data: JSON.stringify({
+                'campfire_id': '{{ campfire_id }}',
+                'message': $('#message').val()
+            }),
+            dataType: 'application/json',
+            contentType: 'application/json',
+            success: function (data) {
+                console.log(data);
+            }
+        });
+    }
+</script>
+
+{% endblock %}

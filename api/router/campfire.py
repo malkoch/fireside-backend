@@ -2,16 +2,26 @@ import json
 from contextlib import asynccontextmanager
 from typing import Annotated
 
+import jwt
 from aiokafka import AIOKafkaProducer
 from fastapi import (
     APIRouter,
     HTTPException,
     Query
 )
+from fastapi.params import Depends
+from fastapi.security import (
+    HTTPAuthorizationCredentials,
+    HTTPBearer
+)
 from sqlmodel import select
 
+from core import secret
 from core.session import PGSessionDep
-from model.campfire import Campfire
+from model.campfire import (
+    Campfire,
+    CampfireMember
+)
 
 
 producer: AIOKafkaProducer
@@ -30,6 +40,7 @@ async def lifespan(app: APIRouter):
 
 
 router = APIRouter(prefix="/campfire", lifespan=lifespan)
+security = HTTPBearer()
 
 
 @router.post("/create")
@@ -44,10 +55,19 @@ async def create(campfire: Campfire, session: PGSessionDep) -> Campfire:
 
 
 @router.post("/join")
-async def join(campfire_id: int, user_id: int):
-    await producer.send('campfire.user.joined', json.dumps({'campfire': campfire_id, 'user': user_id}).encode('utf-8'))
+async def join(campfire_member: CampfireMember, credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)], session: PGSessionDep):
+    token = credentials.credentials
+    payload = jwt.decode(token, key=secret.JWT_SECRET_KEY, algorithms=['HS256'])
 
-    return {'ok': True}
+    campfire_member.user_id = payload['user']
+
+    session.add(campfire_member)
+    session.commit()
+    session.refresh(campfire_member)
+
+    await producer.send('campfire.user.joined', json.dumps({'campfire': campfire_member.campfire_id, 'user': campfire_member.user_id}).encode('utf-8'))
+
+    return campfire_member
 
 
 @router.get("/list")

@@ -16,7 +16,7 @@ templates = Jinja2Templates(directory="web/templates")
 async def send(request: Request):
     body = await request.json()
     message = body.get('message')
-    campfire_id = 1
+    campfire_id = body.get('campfire_id')
 
     token = request.cookies.get('access') or ''
 

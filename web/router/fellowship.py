@@ -3,7 +3,10 @@ from fastapi import (
     Request,
     status
 )
-from fastapi.responses import RedirectResponse
+from fastapi.responses import (
+    JSONResponse,
+    RedirectResponse
+)
 from fastapi.templating import Jinja2Templates
 
 from core import call
@@ -18,6 +21,18 @@ async def index(request: Request):
     response = await call.get('http://127.0.0.1:5000/fellowship/list', {})
 
     return templates.TemplateResponse(request, "fellowship/index.html", {'fellowships': response})
+
+
+@router.post('/create')
+async def create(request: Request):
+    body = await request.json()
+    name = body.get('name')
+
+    token = request.cookies.get('access') or ''
+
+    response = await call.post_authenticated('http://127.0.0.1:5000/fellowship/create', {'name': name}, token)
+
+    return JSONResponse({'success': True})
 
 
 @router.post('/join')
@@ -40,4 +55,8 @@ async def detail(request: Request):
     params = request.query_params
     fellowship_id = params.get('fellowship_id')
 
-    return templates.TemplateResponse(request, "fellowship/detail.html", {})
+    token = request.cookies.get('access') or ''
+
+    campfires = await call.get_authenticated(f'http://127.0.0.1:5000/campfire/list?fellowship_id={fellowship_id}', {}, token)
+
+    return templates.TemplateResponse(request, "fellowship/detail.html", {'campfires': campfires, 'fellowship_id': fellowship_id})
