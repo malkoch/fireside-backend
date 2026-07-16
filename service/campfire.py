@@ -1,4 +1,3 @@
-import asyncio
 import json
 
 from aiokafka import AIOKafkaConsumer
@@ -19,10 +18,10 @@ async def run():
             if message is None:
                 continue
 
-            topic = message.topic()
-            value = message.value().decode('utf-8') if message.value() else ''
+            print(f'CAMPFIRE {message=} {message.topic=} {message.value=}')
 
-            print(f'{topic}: {value}')
+            topic = message.topic
+            value = message.value.decode('utf-8') if message.value else ''
 
             if topic == 'campfire.created':
                 ...
@@ -36,5 +35,3 @@ async def run():
         pass
     finally:
         await consumer.stop()
-
-

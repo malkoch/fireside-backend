@@ -17,7 +17,7 @@ router = APIRouter(prefix="/auth")
 
 
 @router.post("/authenticate")
-async def authenticate(user: User, session: PGSessionDep) -> str:
+async def authenticate(user: User, session: PGSessionDep) -> dict:
     username = user.username
     password = hashlib.sha256(user.password.encode()).hexdigest()
 
@@ -36,4 +36,6 @@ async def authenticate(user: User, session: PGSessionDep) -> str:
     }
     token = jwt.encode(payload, JWT_SECRET_KEY, algorithm="HS256")
 
-    return token
+    return {
+        'token': token
+    }

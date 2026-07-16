@@ -16,6 +16,6 @@ class CampfireType(enum.Enum):
 
 class Campfire(SQLModel, table=True):
     id: int | None = Field(default_factory=generator(1), primary_key=True, sa_type=BIGINT)
-    fellowship_id: int = Field(index=True)
+    fellowship_id: int = Field(index=True, sa_type=BIGINT)
     name: str = Field()
     type: int = Field()

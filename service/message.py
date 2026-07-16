@@ -1,4 +1,3 @@
-import asyncio
 import json
 
 from aiokafka import AIOKafkaConsumer
@@ -19,12 +18,10 @@ async def run():
             if message is None:
                 continue
 
-            print(f'{message=} {message.topic=} {message.value=}')
+            print(f'MESSAGE {message=} {message.topic=} {message.value=}')
 
             topic = message.topic
             value = message.value.decode('utf-8') if message.value else ''
-
-            print(f'{topic}: {value}')
 
             if topic == 'message.created':
                 d = json.loads(value)
@@ -34,14 +31,13 @@ async def run():
 
                 members = await redis_client.smembers(f'campfire:{campfire}:users')
                 members = [member.decode('utf-8') for member in members]
-                print(members)
                 for member in members:
-                    gateway = (await redis_client.get(f'user:{member}:gateway')).decode('utf-8')
+                    gateway_response = await redis_client.get(f'user:{member}:gateway')
+                    if gateway_response is None:
+                        continue
+                    gateway = gateway_response.decode('utf-8')
                     await redis_client.publish(f'gateway:{gateway}', json.dumps({'campfire': campfire, 'user': user, 'body': body}))
     except KeyboardInterrupt:
         pass
     finally:
         await consumer.stop()
-
-
-asyncio.run(run())
