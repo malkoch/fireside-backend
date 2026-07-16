@@ -17,7 +17,7 @@ router = APIRouter(prefix="/auth")
 
 
 @router.post("/authenticate")
-def authenticate(user: User, session: PGSessionDep) -> str:
+async def authenticate(user: User, session: PGSessionDep) -> str:
     username = user.username
     password = hashlib.sha256(user.password.encode()).hexdigest()
 

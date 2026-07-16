@@ -1,36 +1,40 @@
+import asyncio
 import json
 
-import confluent_kafka
-import redis
+from aiokafka import AIOKafkaConsumer
+from redis import asyncio as redis
 
 
-consumer = confluent_kafka.Consumer(
-    {
-        'bootstrap.servers': 'localhost:9092',
-        'group.id': 1
-    }
-)
-redis_client = redis.Redis(host='localhost', port=6379)
+async def run():
+    consumer = AIOKafkaConsumer(
+        'campfire.created', 'campfire.user.joined',
+        bootstrap_servers='localhost:9092', group_id='1', auto_offset_reset='earliest'
+    )
+    redis_client = redis.Redis(host='localhost', port=6379)
 
-try:
-    consumer.subscribe(['campfire.created', 'campfire.user.joined'])
-    while True:
-        message = consumer.poll(timeout=1.)
-        if message is None:
-            continue
+    await consumer.start()
 
-        topic = message.topic()
-        value = message.value().decode('utf-8') if message.value() else None
+    try:
+        async for message in consumer:
+            if message is None:
+                continue
 
-        if topic == 'campfire.created':
-            ...
-        elif topic == 'campfire.user.joined':
-            d = json.loads(value)
-            campfire = d['campfire']
-            user = d['user']
+            topic = message.topic()
+            value = message.value().decode('utf-8') if message.value() else ''
 
-            redis_client.sadd(f'campfire:{campfire}:users', user)
-except KeyboardInterrupt:
-    pass
-finally:
-    consumer.close()
+            print(f'{topic}: {value}')
+
+            if topic == 'campfire.created':
+                ...
+            elif topic == 'campfire.user.joined':
+                d = json.loads(value)
+                campfire = d['campfire']
+                user = d['user']
+
+                await redis_client.sadd(f'campfire:{campfire}:users', user)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        await consumer.stop()
+
+

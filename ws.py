@@ -12,7 +12,7 @@ async def heartbeat(ws):
 
 
 async def connect():
-    token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoxLCJzdWIiOiJtYWxrb2NoIiwicm9sZSI6InVzZXIiLCJleHAiOjE3ODQxNDAyNzV9.ekryGu4tOM7mn5RpDOmZx_dsvOtfzUl-W36APsppYIE"
+    token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjo0Mzc4NDU4ODc5NzQ3NDI4MzUzLCJzdWIiOiJtYWxrb2NoIiwicm9sZSI6InVzZXIiLCJleHAiOjE3ODQxODYyNzh9.ByR6iH-nyDJANwhS__ZUrmEiszpx9yBW18stV_P-Rgc"
     uri = f'ws://localhost:8000/gateway?token={token}'
 
     async with websockets.connect(uri) as websocket:

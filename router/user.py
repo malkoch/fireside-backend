@@ -16,7 +16,7 @@ router = APIRouter(prefix="/user")
 
 
 @router.post("/create")
-def create_user(user: User, session: PGSessionDep) -> User:
+async def create_user(user: User, session: PGSessionDep) -> User:
     user = User(
         username=user.username,
         password=hashlib.sha256(user.password.encode()).hexdigest()
@@ -29,7 +29,7 @@ def create_user(user: User, session: PGSessionDep) -> User:
 
 
 @router.get("/list/")
-def read_users(
+async def read_users(
     session: PGSessionDep,
     offset: int = 0,
     limit: Annotated[int, Query(le=100)] = 100,
@@ -39,7 +39,7 @@ def read_users(
 
 
 @router.get("/{user_id}")
-def read_user(user_id: int, session: PGSessionDep) -> User:
+async def read_user(user_id: int, session: PGSessionDep) -> User:
     user = session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -47,7 +47,7 @@ def read_user(user_id: int, session: PGSessionDep) -> User:
 
 
 @router.delete("/{user_id}")
-def delete_user(user_id: int, session: PGSessionDep):
+async def delete_user(user_id: int, session: PGSessionDep):
     user = session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

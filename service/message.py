@@ -1,39 +1,47 @@
+import asyncio
 import json
 
-import confluent_kafka
-import redis
+from aiokafka import AIOKafkaConsumer
+from redis import asyncio as redis
 
 
-consumer = confluent_kafka.Consumer(
-    {
-        'bootstrap.servers': 'localhost:9092',
-        'group.id': 1
-    }
-)
-redis_client = redis.Redis(host='localhost', port=6379)
+async def run():
+    consumer = AIOKafkaConsumer(
+        'message.created',
+        bootstrap_servers='localhost:9092', group_id='1', auto_offset_reset='earliest'
+    )
+    redis_client = redis.Redis(host='localhost', port=6379)
 
-try:
-    consumer.subscribe(['message.created'])
-    while True:
-        message = consumer.poll(timeout=1.)
-        if message is None:
-            continue
+    await consumer.start()
 
-        topic = message.topic()
-        value = message.value().decode('utf-8') if message.value() else None
+    try:
+        async for message in consumer:
+            if message is None:
+                continue
 
-        if topic == 'message.created':
-            d = json.loads(value)
-            campfire = d['campfire']
-            user = d['user']
-            body = d['body']
+            print(f'{message=} {message.topic=} {message.value=}')
 
-            members = redis_client.smembers(f'campfire:{campfire}:users')
-            members = [member.decode('utf-8') for member in members]
-            for member in members:
-                gateway = redis_client.get(f'user:{member}:gateway').decode('utf-8')
-                redis_client.publish(f'gateway:{gateway}', json.dumps({'campfire': campfire, 'user': user, 'body': body}))
-except KeyboardInterrupt:
-    pass
-finally:
-    consumer.close()
+            topic = message.topic
+            value = message.value.decode('utf-8') if message.value else ''
+
+            print(f'{topic}: {value}')
+
+            if topic == 'message.created':
+                d = json.loads(value)
+                campfire = d['campfire']
+                user = d['user']
+                body = d['body']
+
+                members = await redis_client.smembers(f'campfire:{campfire}:users')
+                members = [member.decode('utf-8') for member in members]
+                print(members)
+                for member in members:
+                    gateway = (await redis_client.get(f'user:{member}:gateway')).decode('utf-8')
+                    await redis_client.publish(f'gateway:{gateway}', json.dumps({'campfire': campfire, 'user': user, 'body': body}))
+    except KeyboardInterrupt:
+        pass
+    finally:
+        await consumer.stop()
+
+
+asyncio.run(run())

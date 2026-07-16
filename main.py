@@ -78,6 +78,7 @@ async def gateway(ws: WebSocket):
             recv = await ws.receive_text()
 
             packet = json.loads(recv)
+            print(packet)
             if packet['op'] == 'HEARTBEAT':
                 await redis_client.set(f'user:{user_id}:heartbeat', datetime.datetime.utcnow().isoformat())
     except WebSocketDisconnect:

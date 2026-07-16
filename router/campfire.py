@@ -1,7 +1,8 @@
 import json
+from contextlib import asynccontextmanager
 from typing import Annotated
 
-import confluent_kafka
+from aiokafka import AIOKafkaProducer
 from fastapi import (
     APIRouter,
     HTTPException,
@@ -13,34 +14,44 @@ from core.session import PGSessionDep
 from model.campfire import Campfire
 
 
-router = APIRouter(prefix="/campfire")
-producer = confluent_kafka.Producer(
-    {
-        'bootstrap.servers': 'localhost:9092'
-    }
-)
+producer: AIOKafkaProducer
+
+
+@asynccontextmanager
+async def lifespan(app: APIRouter):
+    global producer
+
+    producer = AIOKafkaProducer(bootstrap_servers='localhost:9092')
+    await producer.start()
+
+    yield
+
+    await producer.stop()
+
+
+router = APIRouter(prefix="/campfire", lifespan=lifespan)
 
 
 @router.post("/create")
-def create(campfire: Campfire, session: PGSessionDep) -> Campfire:
+async def create(campfire: Campfire, session: PGSessionDep) -> Campfire:
     session.add(campfire)
     session.commit()
     session.refresh(campfire)
 
-    producer.produce('campfire.created', json.dumps({'name': campfire.name}))
+    await producer.send('campfire.created', json.dumps({'name': campfire.name}).encode('utf-8'))
 
     return campfire
 
 
 @router.post("/join")
-def join(campfire_id: int, user_id: int):
-    producer.produce('campfire.user.joined', json.dumps({'campfire': campfire_id, 'user': user_id}))
+async def join(campfire_id: int, user_id: int):
+    await producer.send('campfire.user.joined', json.dumps({'campfire': campfire_id, 'user': user_id}).encode('utf-8'))
 
     return {'ok': True}
 
 
 @router.get("/list")
-def read(
+async def read(
     fellowship_id: int,
     session: PGSessionDep,
     offset: int = 0,
@@ -51,7 +62,7 @@ def read(
 
 
 @router.delete("/{name}")
-def delete(name: str, session: PGSessionDep):
+async def delete(name: str, session: PGSessionDep):
     campfire = session.exec(select(Campfire).where(Campfire.name == name)).first()
     if not campfire:
         raise HTTPException(status_code=404, detail="User not found")
