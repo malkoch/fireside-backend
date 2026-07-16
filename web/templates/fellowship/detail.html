@@ -1,0 +1,37 @@
+{% extends "shared.html" %}
+{% block content %}
+
+<div class="col-lg-12 row">
+    <input type="text" id="message" name="message" value="aaa"/>
+    <button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+    // var socket = new WebSocket("ws://127.0.0.1:5000/gateway?access="+'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjo0Mzc4NTg2MTk1MzM3MTU0NTYwLCJyb2xlIjoidXNlciIsInR5cGUiOiJhY2Nlc3MiLCJleHAiOjE3ODQyMTM3NjcsImlhdCI6MTc4NDIxMTk2N30.Ut0kZDEZn7TO6miG6k1_XipuBpQgTtpnkrRSZsO8cvI');
+    var socket = new WebSocket("ws://127.0.0.1:5000/gateway");
+
+    socket.addEventListener('message', (event) => {
+        console.log(event.data);
+    });
+
+    setInterval(() => {
+        socket.send(JSON.stringify({'op': 'HEARTBEAT'}));
+    }, 1000);
+
+    function sendMessage() {
+        $.ajax({
+            type: 'POST',
+            url: '/message/send',
+            data: JSON.stringify({
+                'message': $('#message').val()
+            }),
+            dataType: 'application/json',
+            contentType: 'application/json',
+            success: function (data) {
+                console.log(data);
+            }
+        });
+    }
+</script>
+
+{% endblock %}

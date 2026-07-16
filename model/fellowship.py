@@ -16,4 +16,4 @@ class Fellowship(SQLModel, table=True):
 class FellowshipMember(SQLModel, table=True):
     id: int | None = Field(default_factory=generator(1), primary_key=True, sa_type=BIGINT)
     fellowship_id: int = Field(sa_type=BIGINT)
-    user_id: int = Field()
+    user_id: int = Field(sa_type=BIGINT)

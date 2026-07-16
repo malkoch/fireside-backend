@@ -1,0 +1,39 @@
+{% extends "shared.html" %}
+{% block content %}
+
+{% for fellowship in fellowships %}
+<div class="col-lg-12 row">
+    <div class="col-lg-6">
+        {{ fellowship.name }}
+    </div>
+
+    <div class="col-lg-6">
+        <button type="button" onclick="join({{ fellowship.id }})">Join</button>
+        <button type="button" onclick="detail({{ fellowship.id }})">Detail</button>
+    </div>
+</div>
+{% endfor %}
+
+
+<script>
+    function join(fellowshipId) {
+        $.ajax({
+            type: 'POST',
+            url: '/fellowship/join',
+            data: JSON.stringify({
+                'fellowship_id': fellowshipId
+            }),
+            dataType: 'application/json',
+            contentType: 'application/json',
+            success: function (data) {
+                console.log(data);
+            }
+        });
+    }
+
+    function detail(fellowshipId) {
+        window.open('/fellowship/detail?fellowship_id=' + fellowshipId, '_blank');
+    }
+</script>
+
+{% endblock %}

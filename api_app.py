@@ -8,19 +8,20 @@ from fastapi import (
     WebSocket,
     WebSocketDisconnect
 )
+from fastapi.middleware.cors import CORSMiddleware
 from redis import asyncio as redis
 from sqlmodel import SQLModel
 
-from core import secret
-from core.secret import GATEWAY_ID
-from core.websocket import manager
-from router import (
+from api.router import (
     auth,
     campfire,
     fellowship,
     message,
     user
 )
+from core import secret
+from core.secret import GATEWAY_ID
+from core.websocket import manager
 
 
 def create_db_and_tables():
@@ -35,6 +36,14 @@ app.include_router(campfire.router)
 app.include_router(fellowship.router)
 app.include_router(message.router)
 app.include_router(user.router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,  # Must be False when using "*"
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 redis_client = redis.Redis(host='localhost', port=6379)
 
@@ -63,9 +72,28 @@ async def on_startup():
     asyncio.create_task(redis_listener())
 
 
+@app.get('/')
+async def index():
+    return {
+        'ok': True
+    }
+
+
 @app.websocket('/gateway')
 async def gateway(ws: WebSocket):
-    token = ws.query_params['token']
+    if ws.cookies.get('access', None):
+        token = ws.cookies.get('access')
+    elif ws.headers.get('Authorization', None):
+        token = ws.headers['Authorization'].split('Bearer ')[1]
+    elif ws.query_params.get('access', None):
+        token = ws.query_params['access']
+    else:
+        token = ''
+
+    if not token:
+        await ws.close()
+        return
+
     payload = jwt.decode(token, key=secret.JWT_SECRET_KEY, algorithms=['HS256'])
 
     user_id = payload['user']

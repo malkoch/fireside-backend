@@ -1,0 +1,65 @@
+:root, [appyfany-theme] {
+    --primary-color: #1c1c1c;
+    --secondary-color: #1C1C1CFF;
+    --tertiary-color: #1C1C1CFF;
+    --accent-color: #1C1C1CFF;
+    --highlight-color: #1C1C1CFF;
+    --primary-text-color: #dae1e1;
+    --secondary-text-color: #dae1e1;
+    --tertiary-text-color: #dae1e1;
+    --link-text-color: #dae1e1;
+    <!--primary-color: #1c1c1c;-->
+    <!--secondary-color: #282726;-->
+    <!--tertiary-color: #332f41;-->
+    <!--accent-color: #C3B1E1;-->
+    <!--highlight-color: #d58333;-->
+    <!--primary-text-color: #dae1e1;-->
+    <!--secondary-text-color: #dae1e1;-->
+    <!--tertiary-text-color: #dae1e1;-->
+    <!--link-text-color: #2a73b5;-->
+}
+
+header, footer {
+    background-color: var(--secondary-color) !important;
+    color: var(--secondary-text-color) !important;
+}
+
+body {
+    background-color: var(--primary-color) !important;
+    color: var(--primary-text-color) !important;
+}
+
+div.container-xl, div.accordion-collapse, ul.dropdown-menu, form.modal-content {
+    background-color: var(--tertiary-color) !important;
+    color: var(--secondary-text-color) !important;
+    border-color: var(--secondary-text-color) !important;
+}
+
+button {
+    background-color: var(--accent-color) !important;
+    color: var(--primary-text-color) !important;
+}
+
+button:hover {
+    background-color: var(--highlight-color) !important;
+}
+
+a {
+    color: var(--link-text-color) !important;
+}
+
+table > thead {
+    background-color: var(--primary-color) !important;
+}
+
+table > tbody > tr:nth-child(odd) {
+    background-color: var(--secondary-color) !important;
+}
+
+table > tbody > tr:nth-child(even) {
+    background-color: var(--tertiary-color) !important;
+}
+
+th, td {
+    color: var(--primary-text-color) !important;
+}
