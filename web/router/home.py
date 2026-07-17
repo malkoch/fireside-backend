@@ -3,7 +3,9 @@ from fastapi import (
     Request,
     status
 )
-from fastapi.responses import RedirectResponse
+from fastapi.responses import (
+    RedirectResponse
+)
 from fastapi.templating import Jinja2Templates
 
 
@@ -25,7 +27,12 @@ async def login_page(request: Request):
 async def login(request: Request):
     from core import call
 
-    response = await call.post('http://127.0.0.1:5000/auth/authenticate', {'username': 'malkoch', 'password': '1234'})
+    form = await request.form()
+
+    username = form.get('username')
+    password = form.get('password')
+
+    response = await call.post('http://127.0.0.1:5000/auth/authenticate', {'username': username, 'password': password})
     access = response['access']
     refresh = response['refresh']
 
@@ -40,6 +47,39 @@ async def login(request: Request):
         'Name': 'John',
         'Surname': 'Doe'
     }
+
+    return response
+
+
+@router.get("/register-page")
+async def register_page(request: Request):
+    return templates.TemplateResponse(request, "home/register.html")
+
+
+@router.post("/register")
+async def register(request: Request):
+    from core import call
+
+    form = await request.form()
+
+    username = form.get('username')
+    password = form.get('password')
+    re_password = form.get('repassword')
+
+    print(f'{username=} {password=} {re_password=}')
+
+    if password != re_password:
+        return RedirectResponse(
+            url='/home/register-page',
+            status_code=status.HTTP_303_SEE_OTHER
+        )
+
+    response = await call.post('http://127.0.0.1:5000/user/create', {'username': username, 'password': password})
+
+    response = RedirectResponse(
+        url="/home/index",
+        status_code=status.HTTP_303_SEE_OTHER
+    )
 
     return response
 
