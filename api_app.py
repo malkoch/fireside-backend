@@ -14,8 +14,8 @@ from sqlmodel import SQLModel
 
 from api.router import (
     auth,
-    campfire,
-    fellowship,
+    camp,
+    fire,
     message,
     user
 )
@@ -32,8 +32,8 @@ def create_db_and_tables():
 
 app = FastAPI()
 app.include_router(auth.router)
-app.include_router(campfire.router)
-app.include_router(fellowship.router)
+app.include_router(camp.router)
+app.include_router(fire.router)
 app.include_router(message.router)
 app.include_router(user.router)
 

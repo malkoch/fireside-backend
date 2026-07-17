@@ -1,16 +1,16 @@
 import asyncio
 
 from service import (
-    campfire,
-    fellowship,
+    camp,
+    fire,
     message
 )
 
 
 async def main():
     await asyncio.gather(
-        asyncio.create_task(campfire.run()),
-        asyncio.create_task(fellowship.run()),
+        asyncio.create_task(camp.run()),
+        asyncio.create_task(fire.run()),
         asyncio.create_task(message.run())
     )
 

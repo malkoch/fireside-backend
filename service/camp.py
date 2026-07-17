@@ -6,7 +6,7 @@ from redis import asyncio as redis
 
 async def run():
     consumer = AIOKafkaConsumer(
-        'fellowship.created', 'fellowship.user.joined',
+        'camp.created', 'camp.user.joined',
         bootstrap_servers='localhost:9092', group_id='1', auto_offset_reset='earliest'
     )
     redis_client = redis.Redis(host='localhost', port=6379)
@@ -18,19 +18,19 @@ async def run():
             if message is None:
                 continue
 
-            print(f'FELLOWSHIP {message=} {message.topic=} {message.value=}')
+            print(f'CAMP {message=} {message.topic=} {message.value=}')
 
             topic = message.topic
             value = message.value.decode('utf-8') if message.value else ''
 
-            if topic == 'fellowship.created':
+            if topic == 'camp.created':
                 ...
-            elif topic == 'fellowship.user.joined':
+            elif topic == 'camp.user.joined':
                 d = json.loads(value)
-                fellowship = d['fellowship']
+                camp = d['camp']
                 user = d['user']
 
-                await redis_client.sadd(f'fellowship:{fellowship}:users', user)
+                await redis_client.sadd(f'camp:{camp}:users', user)
     except KeyboardInterrupt:
         pass
     finally:

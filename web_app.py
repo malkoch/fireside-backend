@@ -1,13 +1,13 @@
 from fastapi import FastAPI
-from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from sqlmodel import SQLModel
 from starlette.middleware.sessions import SessionMiddleware
 
 from web.router import (
-    campfire,
-    fellowship,
+    camp,
+    fire,
     home,
     message
 )
@@ -20,8 +20,8 @@ def create_db_and_tables():
 
 
 app = FastAPI()
-app.include_router(campfire.router)
-app.include_router(fellowship.router)
+app.include_router(camp.router)
+app.include_router(fire.router)
 app.include_router(home.router)
 app.include_router(message.router)
 

@@ -16,11 +16,11 @@ templates = Jinja2Templates(directory="web/templates")
 async def send(request: Request):
     body = await request.json()
     message = body.get('message')
-    campfire_id = body.get('campfire_id')
+    fire_id = body.get('fire_id')
 
     token = request.cookies.get('access') or ''
 
-    response = await call.post_authenticated('http://127.0.0.1:5000/message/create', {'campfire_id': campfire_id, 'body': message}, token)
+    response = await call.post_authenticated('http://127.0.0.1:5000/message/create', {'fire_id': fire_id, 'body': message}, token)
 
     return JSONResponse(
         {

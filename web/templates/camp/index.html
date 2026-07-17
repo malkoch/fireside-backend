@@ -2,19 +2,19 @@
 {% block content %}
 
 <div class="col-lg-12 row">
-    <input type="text" id="name" name="name" value="minas-morgul"/>
+    <input type="text" id="name" name="name" value="first-camp"/>
     <button type="button" onclick="create();">Create</button>
 </div>
 
-{% for campfire in campfires %}
+{% for camp in camps %}
 <div class="col-lg-12 row">
     <div class="col-lg-6">
-        {{ campfire.name }}
+        {{ camp.name }}
     </div>
 
     <div class="col-lg-6">
-        <button type="button" onclick="join({{ campfire.id }})">Join</button>
-        <button type="button" onclick="detail({{ campfire.id }})">Detail</button>
+        <button type="button" onclick="join({{ camp.id }})">Join</button>
+        <button type="button" onclick="detail({{ camp.id }})">Detail</button>
     </div>
 </div>
 {% endfor %}
@@ -23,11 +23,9 @@
     function create() {
         $.ajax({
             type: 'POST',
-            url: '/campfire/create',
+            url: '/camp/create',
             data: JSON.stringify({
-                'fellowship_id': '{{ fellowship_id }}',
-                'name': $('#name').val(),
-                'type': 1
+                'name': $('#name').val()
             }),
             dataType: 'application/json',
             contentType: 'application/json',
@@ -36,12 +34,12 @@
         });
     }
 
-    function join(campfireId) {
+    function join(campId) {
         $.ajax({
             type: 'POST',
-            url: '/campfire/join',
+            url: '/camp/join',
             data: JSON.stringify({
-                'campfire_id': campfireId
+                'camp_id': campId
             }),
             dataType: 'application/json',
             contentType: 'application/json',
@@ -51,8 +49,8 @@
         });
     }
 
-    function detail(campfireId) {
-        window.open('/campfire/detail?campfire_id=' + campfireId, '_blank');
+    function detail(campId) {
+        window.open('/camp/detail?camp_id=' + campId, '_blank');
     }
 </script>
 

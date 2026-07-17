@@ -2,19 +2,19 @@
 {% block content %}
 
 <div class="col-lg-12 row">
-    <input type="text" id="name" name="name" value="fellowship-of-the-ring"/>
+    <input type="text" id="name" name="name" value="first-fire"/>
     <button type="button" onclick="create();">Create</button>
 </div>
 
-{% for fellowship in fellowships %}
+{% for fire in fires %}
 <div class="col-lg-12 row">
     <div class="col-lg-6">
-        {{ fellowship.name }}
+        {{ fire.name }}
     </div>
 
     <div class="col-lg-6">
-        <button type="button" onclick="join({{ fellowship.id }})">Join</button>
-        <button type="button" onclick="detail({{ fellowship.id }})">Detail</button>
+        <button type="button" onclick="join({{ fire.id }})">Join</button>
+        <button type="button" onclick="detail({{ fire.id }})">Detail</button>
     </div>
 </div>
 {% endfor %}
@@ -23,9 +23,11 @@
     function create() {
         $.ajax({
             type: 'POST',
-            url: '/fellowship/create',
+            url: '/fire/create',
             data: JSON.stringify({
-                'name': $('#name').val()
+                'camp_id': '{{ camp_id }}',
+                'name': $('#name').val(),
+                'type': 1
             }),
             dataType: 'application/json',
             contentType: 'application/json',
@@ -34,12 +36,12 @@
         });
     }
 
-    function join(fellowshipId) {
+    function join(fireId) {
         $.ajax({
             type: 'POST',
-            url: '/fellowship/join',
+            url: '/fire/join',
             data: JSON.stringify({
-                'fellowship_id': fellowshipId
+                'fire_id': fireId
             }),
             dataType: 'application/json',
             contentType: 'application/json',
@@ -49,8 +51,8 @@
         });
     }
 
-    function detail(fellowshipId) {
-        window.open('/fellowship/detail?fellowship_id=' + fellowshipId, '_blank');
+    function detail(fireId) {
+        window.open('/fire/detail?fire_id=' + fireId, '_blank');
     }
 </script>
 

@@ -18,9 +18,9 @@ from sqlmodel import select
 
 from core import secret
 from core.session import PGSessionDep
-from model.fellowship import (
-    Fellowship,
-    FellowshipMember
+from model.camp import (
+    Camp,
+    CampMember
 )
 
 
@@ -39,40 +39,40 @@ async def lifespan(app: APIRouter):
     await producer.stop()
 
 
-router = APIRouter(prefix="/fellowship", lifespan=lifespan)
+router = APIRouter(prefix="/camp", lifespan=lifespan)
 security = HTTPBearer()
 
 
 @router.post("/create")
-async def create(fellowship: Fellowship, credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)], session: PGSessionDep) -> Fellowship:
+async def create(camp: Camp, credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)], session: PGSessionDep) -> Camp:
     token = credentials.credentials
     payload = jwt.decode(token, key=secret.JWT_SECRET_KEY, algorithms=['HS256'])
 
-    fellowship.creator_id = payload['user']
+    camp.creator_id = payload['user']
 
-    session.add(fellowship)
+    session.add(camp)
     session.commit()
-    session.refresh(fellowship)
+    session.refresh(camp)
 
-    await producer.send('fellowship.created', json.dumps({'name': fellowship.name}).encode('utf-8'))
+    await producer.send('camp.created', json.dumps({'name': camp.name}).encode('utf-8'))
 
-    return fellowship
+    return camp
 
 
 @router.post("/join")
-async def join(fellowship_member: FellowshipMember, credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)], session: PGSessionDep) -> FellowshipMember:
+async def join(camp_member: CampMember, credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)], session: PGSessionDep) -> CampMember:
     token = credentials.credentials
     payload = jwt.decode(token, key=secret.JWT_SECRET_KEY, algorithms=['HS256'])
 
-    fellowship_member.user_id = payload['user']
+    camp_member.user_id = payload['user']
 
-    session.add(fellowship_member)
+    session.add(camp_member)
     session.commit()
-    session.refresh(fellowship_member)
+    session.refresh(camp_member)
 
-    await producer.send('fellowship.user.joined', json.dumps({'fellowship': fellowship_member.fellowship_id, 'user': fellowship_member.user_id}).encode('utf-8'))
+    await producer.send('camp.user.joined', json.dumps({'camp': camp_member.camp_id, 'user': camp_member.user_id}).encode('utf-8'))
 
-    return fellowship_member
+    return camp_member
 
 
 @router.get("/list")
@@ -80,14 +80,14 @@ async def read(
     session: PGSessionDep,
     offset: int = 0,
     limit: Annotated[int, Query(le=100)] = 100,
-) -> list[Fellowship]:
-    objects = session.exec(select(Fellowship).offset(offset).limit(limit)).all()
+) -> list[Camp]:
+    objects = session.exec(select(Camp).offset(offset).limit(limit)).all()
     return objects
 
 
 @router.delete("/{name}")
 async def delete(name: str, session: PGSessionDep):
-    fellowship = session.exec(select(Fellowship).where(Fellowship.name == name)).first()
+    fellowship = session.exec(select(Camp).where(Camp.name == name)).first()
     if not fellowship:
         raise HTTPException(status_code=404, detail="User not found")
     session.delete(fellowship)

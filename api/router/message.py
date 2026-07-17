@@ -46,6 +46,6 @@ async def create(message: Message, credentials: Annotated[HTTPAuthorizationCrede
     session.commit()
     session.refresh(message)
 
-    await producer.send('message.created', json.dumps({'campfire': message.campfire_id, 'user': message.user_id, 'body': message.body}).encode('utf-8'))
+    await producer.send('message.created', json.dumps({'fire': message.fire_id, 'user': message.user_id, 'body': message.body}).encode('utf-8'))
 
     return message

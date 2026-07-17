@@ -25,18 +25,18 @@ async def run():
 
             if topic == 'message.created':
                 d = json.loads(value)
-                campfire = d['campfire']
+                fire = d['fire']
                 user = d['user']
                 body = d['body']
 
-                members = await redis_client.smembers(f'campfire:{campfire}:users')
+                members = await redis_client.smembers(f'fire:{fire}:users')
                 members = [member.decode('utf-8') for member in members]
                 for member in members:
                     gateway_response = await redis_client.get(f'user:{member}:gateway')
                     if gateway_response is None:
                         continue
                     gateway = gateway_response.decode('utf-8')
-                    await redis_client.publish(f'gateway:{gateway}', json.dumps({'campfire': campfire, 'user': user, 'body': body}))
+                    await redis_client.publish(f'gateway:{gateway}', json.dumps({'fire': fire, 'user': user, 'body': body}))
     except KeyboardInterrupt:
         pass
     finally:

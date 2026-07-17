@@ -12,15 +12,15 @@ from fastapi.templating import Jinja2Templates
 from core import call
 
 
-router = APIRouter(prefix="/fellowship")
+router = APIRouter(prefix="/camp")
 templates = Jinja2Templates(directory="web/templates")
 
 
 @router.get("/index")
 async def index(request: Request):
-    response = await call.get('http://127.0.0.1:5000/fellowship/list', {})
+    response = await call.get('http://127.0.0.1:5000/camp/list', {})
 
-    return templates.TemplateResponse(request, "fellowship/index.html", {'fellowships': response})
+    return templates.TemplateResponse(request, "camp/index.html", {'camps': response})
 
 
 @router.post('/create')
@@ -30,7 +30,7 @@ async def create(request: Request):
 
     token = request.cookies.get('access') or ''
 
-    response = await call.post_authenticated('http://127.0.0.1:5000/fellowship/create', {'name': name}, token)
+    response = await call.post_authenticated('http://127.0.0.1:5000/camp/create', {'name': name}, token)
 
     return JSONResponse({'success': True})
 
@@ -38,14 +38,14 @@ async def create(request: Request):
 @router.post('/join')
 async def join(request: Request):
     body = await request.json()
-    fellowship_id = body.get('fellowship_id')
+    camp_id = body.get('camp_id')
 
     token = request.cookies.get('access') or ''
 
-    response = await call.post_authenticated('http://127.0.0.1:5000/fellowship/join', {'fellowship_id': fellowship_id}, token)
+    response = await call.post_authenticated('http://127.0.0.1:5000/camp/join', {'camp_id': camp_id}, token)
 
     return RedirectResponse(
-        url=f"/fellowship/detail?fellowship_id={fellowship_id}",
+        url=f"/camp/detail?camp_id={camp_id}",
         status_code=status.HTTP_303_SEE_OTHER
     )
 
@@ -53,10 +53,10 @@ async def join(request: Request):
 @router.get('/detail')
 async def detail(request: Request):
     params = request.query_params
-    fellowship_id = params.get('fellowship_id')
+    camp_id = params.get('camp_id')
 
     token = request.cookies.get('access') or ''
 
-    campfires = await call.get_authenticated(f'http://127.0.0.1:5000/campfire/list?fellowship_id={fellowship_id}', {}, token)
+    fires = await call.get_authenticated(f'http://127.0.0.1:5000/fire/list?camp_id={camp_id}', {}, token)
 
-    return templates.TemplateResponse(request, "fellowship/detail.html", {'campfires': campfires, 'fellowship_id': fellowship_id})
+    return templates.TemplateResponse(request, "camp/detail.html", {'fires': fires, 'camp_id': camp_id})
