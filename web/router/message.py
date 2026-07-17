@@ -20,7 +20,7 @@ async def send(request: Request):
 
     token = request.cookies.get('access') or ''
 
-    response = await call.post_authenticated('http://127.0.0.1:5000/message/create', {'fire_id': fire_id, 'body': message}, token)
+    response = await call.post('http://127.0.0.1:5000/message/create', {'fire_id': fire_id, 'body': message}, token)
 
     return JSONResponse(
         {

@@ -2,8 +2,13 @@
 {% block content %}
 
 <div class="col-lg-12 row">
-    <input type="text" id="name" name="name" value="first-fire"/>
-    <button type="button" onclick="create();">Create</button>
+    <div class="col-lg-6">
+        <label for="name">Name: </label>
+        <input type="text" id="name" name="name" value="first-fire" style="width: 90%;"/>
+    </div>
+    <div class="col-lg-6">
+        <button type="button" onclick="create();">Create</button>
+    </div>
 </div>
 
 {% for fire in fires %}
@@ -32,6 +37,7 @@
             dataType: 'application/json',
             contentType: 'application/json',
             success: function (data) {
+                window.location.reload();
             }
         });
     }
@@ -46,7 +52,7 @@
             dataType: 'application/json',
             contentType: 'application/json',
             success: function (data) {
-                console.log(data);
+                window.location.reload();
             }
         });
     }

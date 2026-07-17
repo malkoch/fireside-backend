@@ -3,7 +3,10 @@ from fastapi import (
     Request,
     status
 )
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi.responses import (
+    JSONResponse,
+    RedirectResponse
+)
 from fastapi.templating import Jinja2Templates
 
 from core import call
@@ -11,14 +14,6 @@ from core import call
 
 router = APIRouter(prefix="/fire")
 templates = Jinja2Templates(directory="web/templates")
-
-
-@router.get("/index")
-async def index(request: Request):
-    response = await call.get('http://127.0.0.1:5000/fire/list', {})
-
-    return templates.TemplateResponse(request, "fire/index.html", {'fires': response})
-
 
 
 @router.post('/create')
@@ -30,9 +25,10 @@ async def create(request: Request):
 
     token = request.cookies.get('access') or ''
 
-    response = await call.post_authenticated('http://127.0.0.1:5000/fire/create', {'camp_id': camp_id, 'name': name, 'type': type_}, token)
+    response = await call.post('http://127.0.0.1:5000/fire/create', {'camp_id': camp_id, 'name': name, 'type': type_}, token)
 
     return JSONResponse({'success': True})
+
 
 @router.post('/join')
 async def join(request: Request):
@@ -41,7 +37,7 @@ async def join(request: Request):
 
     token = request.cookies.get('access') or ''
 
-    response = await call.post_authenticated('http://127.0.0.1:5000/fire/join', {'fire_id': fire_id}, token)
+    response = await call.post('http://127.0.0.1:5000/fire/join', {'fire_id': fire_id}, token)
 
     return RedirectResponse(
         url=f"/fire/detail?fire_id={fire_id}",

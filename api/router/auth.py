@@ -52,7 +52,7 @@ async def authenticate(user: User, session: PGSessionDep) -> dict:
         }, JWT_SECRET_KEY, algorithm="HS256"
     )
 
-    refresh_token: UserRefreshToken = UserRefreshToken(user_id=db_user.id, refresh_token=ref)
+    refresh_token: UserRefreshToken = UserRefreshToken(user_id=db_user.id, refresh_token=hashlib.sha256(ref.encode('utf-8')).hexdigest())
 
     session.add(refresh_token)
     session.commit()
@@ -75,7 +75,7 @@ async def refresh(ref: UserRefreshToken, session: PGSessionDep) -> dict:
     db_token = session.exec(select(UserRefreshToken).where(UserRefreshToken.user_id == user_id)).first()
     if not db_token:
         raise ValueError('refresh token not found')
-    if db_token.refresh_token != ref.refresh_token:
+    if db_token.refresh_token != hashlib.sha256(ref.refresh_token.encode('utf-8')).hexdigest():
         raise ValueError('refresh token not found')
 
     access = jwt.encode(

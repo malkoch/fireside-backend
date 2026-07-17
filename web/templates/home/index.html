@@ -1,4 +1,65 @@
 {% extends "shared.html" %}
 {% block content %}
 
+<style>
+    .add-server {
+        width: 56px;
+        height: 56px;
+        border: 2px dashed #4e5058;
+        border-radius: 50%;
+        background: transparent;
+        color: #b5bac1;
+        font-size: 30px;
+        font-weight: 300;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color .2s ease,
+        border-color .2s ease,
+        color .2s ease,
+        transform .15s ease;
+    }
+
+    .add-server:hover {
+        background: #23a559;
+        border-color: #23a559;
+        color: white;
+        transform: scale(1.08);
+    }
+
+    .add-server:active {
+        transform: scale(0.95);
+    }
+</style>
+
+<div class="modal" id="server-modal" tabindex="-1" aria-labelledby="server-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="server-modal-label">Modal title</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-12 row">
+                    <div class="col-lg-3">
+                        <label for="name">Name: </label>
+                    </div>
+                    <div class="col-lg-9">
+                        <input type="text" id="name" name="name" placeholder="Server Name">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-lg-12 row">
+    <button class="add-server" aria-label="Add Server" type="button" data-bs-toggle="modal" data-bs-target="#server-modal">+</button>
+</div>
+
 {% endblock %}
