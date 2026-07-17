@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlmodel import SQLModel
@@ -39,3 +40,8 @@ app.add_middleware(
 @app.on_event("startup")
 async def on_startup():
     create_db_and_tables()
+
+
+@app.get("/")
+async def index():
+    return RedirectResponse("/home/index")
