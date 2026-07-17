@@ -1,8 +1,10 @@
+import datetime
 import enum
 
 from sqlmodel import (
     BIGINT,
     Field,
+    Index,
     SQLModel
 )
 
@@ -15,13 +17,20 @@ class FireType(enum.Enum):
 
 
 class Fire(SQLModel, table=True):
+    __table_args__ = (
+        Index('unique_name_index', 'camp_id', 'name', unique=True),
+    )
+
     id: int | None = Field(default_factory=generator(1), primary_key=True, sa_type=BIGINT)
     camp_id: int = Field(index=True, sa_type=BIGINT)
     name: str = Field()
     type: int = Field()
+    created_at: datetime.datetime = Field(default_factory=datetime.datetime.now)
 
 
 class FireMember(SQLModel, table=True):
     id: int | None = Field(default_factory=generator(1), primary_key=True, sa_type=BIGINT)
     fire_id: int = Field(sa_type=BIGINT)
     user_id: int = Field(sa_type=BIGINT)
+    joined_at: datetime.datetime = Field(default_factory=datetime.datetime.now)
+    left_at: datetime.datetime | None = Field(default=None)
