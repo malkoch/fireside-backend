@@ -18,7 +18,7 @@ class FireType(enum.Enum):
 
 class Fire(SQLModel, table=True):
     __table_args__ = (
-        Index('unique_name_index', 'camp_id', 'name', unique=True),
+        Index('unique_fire_name_index', 'camp_id', 'name', unique=True),
     )
 
     id: int | None = Field(default_factory=generator(1), primary_key=True, sa_type=BIGINT)
@@ -30,7 +30,7 @@ class Fire(SQLModel, table=True):
 
 class FireMember(SQLModel, table=True):
     __table_args__ = (
-        Index('unique_member_index', 'fire_id', 'user_id', unique=True),
+        Index('unique_fire_member_index', 'fire_id', 'user_id', unique=True),
     )
 
     id: int | None = Field(default_factory=generator(1), primary_key=True, sa_type=BIGINT)

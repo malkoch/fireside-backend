@@ -20,7 +20,7 @@ class Camp(SQLModel, table=True):
 
 class CampMember(SQLModel, table=True):
     __table_args__ = (
-        Index('unique_member_index', 'camp_id', 'user_id', unique=True),
+        Index('unique_camp_member_index', 'camp_id', 'user_id', unique=True),
     )
 
     id: int | None = Field(default_factory=generator(1), primary_key=True, sa_type=BIGINT)
