@@ -1,3 +1,5 @@
+import json
+
 from fastapi import (
     APIRouter,
     Request
@@ -35,7 +37,8 @@ async def get(request: Request):
 
     controller = params.get('controller', None) or ''
     action = params.get('action', None) or ''
-    data = params.get('data', None) or {}
+    data = params.get('data', None) or ''
+    data = json.loads(data) if data else {}
 
     token = request.cookies.get('access') or ''
 

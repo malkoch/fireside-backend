@@ -17,6 +17,10 @@ async def post(url: str, data: dict, token: str = ''):
 
 async def get(url: str, data: dict, token: str = ''):
     try:
+        params = '&'.join([f'{key}={value}' for key, value in data.items()])
+        if params:
+            url += f'?{params}'
+
         if token:
             response = requests.get(url, data=data, headers={'Authorization': f'Bearer {token}', 'Content-Type': 'application/json', 'Accept': 'application/json'})
         else:
