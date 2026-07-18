@@ -46,20 +46,128 @@
                         <label for="name">Name: </label>
                     </div>
                     <div class="col-lg-9">
-                        <input type="text" id="name" name="name" placeholder="Server Name">
+                        <input type="text" id="name" name="name" placeholder="Server Name" value="first-camp">
+                    </div>
+                    <div class="col-lg-9">
+                        <input type="file" id="icon" name="icon" class="icon">
+                        <img name="icon-preview" src="" style="display: none;">
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
+                <button type="button" class="btn btn-primary" onclick="join();">Join</button>
+                <button type="button" class="btn btn-primary" onclick="create();">Create</button>
             </div>
         </div>
     </div>
 </div>
 
 <div class="col-lg-12 row">
-    <button class="add-server" aria-label="Add Server" type="button" data-bs-toggle="modal" data-bs-target="#server-modal">+</button>
+    <div class="col-lg-3" id="camp-list">
+        <div class="col-lg-12">
+            <button class="add-server" aria-label="Add Server" type="button" data-bs-toggle="modal" data-bs-target="#server-modal">+</button>
+        </div>
+    </div>
+    <div class="col-lg-9">
+
+    </div>
 </div>
+
+<script>
+    function join() {
+        $.ajax({
+            type: 'POST',
+            url: '/proxy/post',
+            data: JSON.stringify({
+                'controller': 'camp',
+                'action': 'join',
+                'data': {
+                    'name': $('input[name=name]').val()
+                }
+            }),
+            dataType: 'application/json',
+            contentType: 'application/json',
+            success: function (data) {
+                console.log(data);
+            }
+        });
+    }
+
+    function create() {
+        $.ajax({
+            type: 'POST',
+            url: '/proxy/post',
+            data: JSON.stringify({
+                'controller': 'camp',
+                'action': 'create',
+                'data': {
+                    'name': $('input[name=name]').val(),
+                    'icon': $('img[name=icon-preview]').attr('src')
+                }
+            }),
+            dataType: 'application/json',
+            contentType: 'application/json',
+            success: function (data) {
+                console.log(data);
+            }
+        });
+    }
+
+    function detail(campId) {
+        console.log(campId);
+    }
+
+    function showCamp(camp) {
+        $('#camp-list').append(
+            '<div class="col-lg-12"><button class="add-server" type="button" onclick="detail(' + camp.id + ')"><img src="' + camp.icon + '" style="width: 48px;"/></button></div>'
+        )
+    }
+
+    function getUserCamps() {
+        $.ajax({
+            type: 'GET',
+            url: '/proxy/get',
+            data: {
+                'controller': 'camp',
+                'action': 'user-camps',
+                'data': {}
+            },
+            // dataType: 'application/json',
+            contentType: 'application/json',
+            success: function (data) {
+                $.each(data, function (idx, camp) {
+                    showCamp(camp);
+                });
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        const inputElements = document.querySelectorAll('.icon');
+
+        inputElements.forEach(inputElement => {
+            inputElement.addEventListener('change', handleFileChange);
+        });
+
+        function handleFileChange(event) {
+            const file = event.target.files[0];
+            const preview = event.target.nextElementSibling;
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const fileContent = e.target.result;
+                    preview.src = fileContent;
+                };
+                reader.onerror = function (e) {
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        getUserCamps();
+    });
+</script>
 
 {% endblock %}

@@ -4,6 +4,7 @@ import hashlib
 import jwt
 from fastapi import (
     APIRouter,
+    Body,
     HTTPException
 )
 from sqlmodel import select
@@ -21,9 +22,12 @@ router = APIRouter(prefix="/auth")
 
 
 @router.post("/authenticate")
-async def authenticate(user: User, session: PGSessionDep) -> dict:
-    username = user.username
-    password = hashlib.sha256(user.password.encode()).hexdigest()
+async def authenticate(
+    session: PGSessionDep,
+    username: str = Body(...),
+    password: str = Body(...)
+) -> dict:
+    password = hashlib.sha256(password.encode('utf-8')).hexdigest()
 
     db_user = session.exec(select(User).where(User.username == username)).first()
     if not db_user:
@@ -65,8 +69,11 @@ async def authenticate(user: User, session: PGSessionDep) -> dict:
 
 
 @router.post("/refresh")
-async def refresh(ref: UserRefreshToken, session: PGSessionDep) -> dict:
-    payload = jwt.decode(ref.refresh_token, key=secret.JWT_SECRET_KEY, algorithms=['HS256'])
+async def refresh(
+    session: PGSessionDep,
+    ref: str = Body(...)
+) -> dict:
+    payload = jwt.decode(ref, key=secret.JWT_SECRET_KEY, algorithms=['HS256'])
     if payload['type'] not in ('refresh',):
         raise ValueError('this is not a refresh token')
 
@@ -75,7 +82,7 @@ async def refresh(ref: UserRefreshToken, session: PGSessionDep) -> dict:
     db_token = session.exec(select(UserRefreshToken).where(UserRefreshToken.user_id == user_id)).first()
     if not db_token:
         raise ValueError('refresh token not found')
-    if db_token.refresh_token != hashlib.sha256(ref.refresh_token.encode('utf-8')).hexdigest():
+    if db_token.refresh_token != hashlib.sha256(ref.encode('utf-8')).hexdigest():
         raise ValueError('refresh token not found')
 
     access = jwt.encode(

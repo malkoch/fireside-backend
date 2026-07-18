@@ -6,6 +6,7 @@ import jwt
 from aiokafka import AIOKafkaProducer
 from fastapi import (
     APIRouter,
+    Body,
     HTTPException,
     Query
 )
@@ -20,8 +21,10 @@ from core import secret
 from core.session import PGSessionDep
 from model.camp import (
     Camp,
-    CampMember
+    CampMember,
+    UserCamp
 )
+from model.image import Image
 
 
 producer: AIOKafkaProducer
@@ -44,15 +47,24 @@ security = HTTPBearer()
 
 
 @router.post("/create")
-async def create(camp: Camp, credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)], session: PGSessionDep) -> Camp:
+async def create(
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    session: PGSessionDep,
+    name: str = Body(...),
+    icon: str = Body(...)
+) -> Camp:
     token = credentials.credentials
     payload = jwt.decode(token, key=secret.JWT_SECRET_KEY, algorithms=['HS256'])
 
-    camp.creator_id = payload['user']
-
+    camp = Camp(name=name, creator_id=payload['user'])
     session.add(camp)
     session.commit()
     session.refresh(camp)
+
+    image = Image(owner_id=camp.id, content=icon)
+    session.add(image)
+    session.commit()
+    session.refresh(image)
 
     await producer.send('camp.created', json.dumps({'name': camp.name}).encode('utf-8'))
 
@@ -60,11 +72,18 @@ async def create(camp: Camp, credentials: Annotated[HTTPAuthorizationCredentials
 
 
 @router.post("/join")
-async def join(camp_member: CampMember, credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)], session: PGSessionDep) -> CampMember:
+async def join(
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    session: PGSessionDep,
+    name: str = Body(...),
+    dummy: int = Body(0)
+) -> CampMember:
     token = credentials.credentials
     payload = jwt.decode(token, key=secret.JWT_SECRET_KEY, algorithms=['HS256'])
 
-    camp_member.user_id = payload['user']
+    camp = session.exec(select(Camp).where(Camp.name == name)).first()
+
+    camp_member = CampMember(camp_id=camp.id, user_id=payload['user'])
 
     session.add(camp_member)
     session.commit()
@@ -85,8 +104,37 @@ async def read(
     return objects
 
 
+@router.get('/user-camps')
+async def read_user_camps(
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    session: PGSessionDep
+) -> list[UserCamp]:
+    token = credentials.credentials
+    payload = jwt.decode(token, key=secret.JWT_SECRET_KEY, algorithms=['HS256'])
+
+    camp_members = session.exec(select(CampMember).where(CampMember.user_id == payload['user'])).all()
+
+    objects = []
+    for camp_member in camp_members:
+        camp = session.exec(select(Camp).where(Camp.id == camp_member.camp_id)).first()
+        camp_users = session.exec(select(CampMember).where(CampMember.camp_id == camp.id)).all()
+        camp_image = session.exec(select(Image).where(Image.owner_id == camp.id)).first()
+
+        user_camp = UserCamp(
+            id=camp.id,
+            name=camp.name,
+            users=[camp_user.user_id for camp_user in camp_users],
+            icon=camp_image.content
+        )
+        objects.append(user_camp)
+    return objects
+
+
 @router.delete("/{name}")
-async def delete(name: str, session: PGSessionDep):
+async def delete(
+    session: PGSessionDep,
+    name: str
+):
     fellowship = session.exec(select(Camp).where(Camp.name == name)).first()
     if not fellowship:
         raise HTTPException(status_code=404, detail="User not found")

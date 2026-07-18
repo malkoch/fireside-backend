@@ -6,6 +6,7 @@ import jwt
 from aiokafka import AIOKafkaProducer
 from fastapi import (
     APIRouter,
+    Body,
     HTTPException,
     Query
 )
@@ -44,7 +45,13 @@ security = HTTPBearer()
 
 
 @router.post("/create")
-async def create(fire: Fire, session: PGSessionDep) -> Fire:
+async def create(
+    session: PGSessionDep,
+    camp_id: int = Body(...),
+    name: str = Body(...)
+) -> Fire:
+    fire = Fire(camp_id=camp_id, name=name)
+
     session.add(fire)
     session.commit()
     session.refresh(fire)
@@ -55,11 +62,15 @@ async def create(fire: Fire, session: PGSessionDep) -> Fire:
 
 
 @router.post("/join")
-async def join(fire_member: FireMember, credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)], session: PGSessionDep):
+async def join(
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    session: PGSessionDep,
+    fire_id: int = Body(...)
+):
     token = credentials.credentials
     payload = jwt.decode(token, key=secret.JWT_SECRET_KEY, algorithms=['HS256'])
 
-    fire_member.user_id = payload['user']
+    fire_member = FireMember(fire_id=fire_id, user_id=payload['user'])
 
     session.add(fire_member)
     session.commit()
@@ -72,8 +83,8 @@ async def join(fire_member: FireMember, credentials: Annotated[HTTPAuthorization
 
 @router.get("/list")
 async def read(
-    camp_id: int,
     session: PGSessionDep,
+    camp_id: int,
     offset: int = 0,
     limit: Annotated[int, Query(le=100)] = 100,
 ) -> list[Fire]:
@@ -82,7 +93,10 @@ async def read(
 
 
 @router.delete("/{name}")
-async def delete(name: str, session: PGSessionDep):
+async def delete(
+    session: PGSessionDep,
+    name: str
+):
     campfire = session.exec(select(Fire).where(Fire.name == name)).first()
     if not campfire:
         raise HTTPException(status_code=404, detail="User not found")

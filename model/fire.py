@@ -29,6 +29,10 @@ class Fire(SQLModel, table=True):
 
 
 class FireMember(SQLModel, table=True):
+    __table_args__ = (
+        Index('unique_member_index', 'fire_id', 'user_id', unique=True),
+    )
+
     id: int | None = Field(default_factory=generator(1), primary_key=True, sa_type=BIGINT)
     fire_id: int = Field(sa_type=BIGINT)
     user_id: int = Field(sa_type=BIGINT)

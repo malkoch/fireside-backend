@@ -15,7 +15,10 @@ templates = Jinja2Templates(directory="web/templates")
 
 @router.get("/index")
 async def index(request: Request):
-    return templates.TemplateResponse(request, "home/index.html")
+    if request.session and request.session['user']:
+        return templates.TemplateResponse(request, "home/index.html")
+    else:
+        return RedirectResponse(url="/home/login-page", status_code=status.HTTP_303_SEE_OTHER)
 
 
 @router.get("/login-page")

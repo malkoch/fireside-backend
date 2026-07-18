@@ -40,14 +40,14 @@ async def create(request: Request):
 @router.post('/join')
 async def join(request: Request):
     body = await request.json()
-    camp_id = body.get('camp_id')
+    name = body.get('name')
 
     token = request.cookies.get('access') or ''
 
-    response = await call.post('http://127.0.0.1:5000/camp/join', {'camp_id': camp_id}, token)
+    response = await call.post('http://127.0.0.1:5000/camp/join', {'name': name}, token)
 
     return RedirectResponse(
-        url=f"/camp/detail?camp_id={camp_id}",
+        url=f"/camp/detail?name={name}",
         status_code=status.HTTP_303_SEE_OTHER
     )
 

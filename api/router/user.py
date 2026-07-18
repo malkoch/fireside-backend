@@ -3,6 +3,7 @@ from typing import Annotated
 
 from fastapi import (
     APIRouter,
+    Body,
     HTTPException,
     Query
 )
@@ -16,10 +17,14 @@ router = APIRouter(prefix="/user")
 
 
 @router.post("/create")
-async def create_user(user: User, session: PGSessionDep) -> User:
+async def create_user(
+    session: PGSessionDep,
+    username: str = Body(...),
+    password: str = Body(...)
+) -> User:
     user = User(
-        username=user.username,
-        password=hashlib.sha256(user.password.encode()).hexdigest()
+        username=username,
+        password=hashlib.sha256(password.encode()).hexdigest()
     )
 
     session.add(user)
@@ -39,7 +44,10 @@ async def read_users(
 
 
 @router.get("/{user_id}")
-async def read_user(user_id: int, session: PGSessionDep) -> User:
+async def read_user(
+    session: PGSessionDep,
+    user_id: int
+) -> User:
     user = session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -47,7 +55,10 @@ async def read_user(user_id: int, session: PGSessionDep) -> User:
 
 
 @router.delete("/{user_id}")
-async def delete_user(user_id: int, session: PGSessionDep):
+async def delete_user(
+    session: PGSessionDep,
+    user_id: int
+):
     user = session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
