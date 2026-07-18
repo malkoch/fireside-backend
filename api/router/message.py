@@ -6,13 +6,15 @@ import jwt
 from aiokafka import AIOKafkaProducer
 from fastapi import (
     APIRouter,
-    Body
+    Body,
+    Query
 )
 from fastapi.params import Depends
 from fastapi.security import (
     HTTPAuthorizationCredentials,
     HTTPBearer
 )
+from sqlmodel import select
 
 from core import secret
 from core.session import PGSessionDep
@@ -57,3 +59,14 @@ async def create(
     await producer.send('message.created', json.dumps({'fire': message.fire_id, 'user': message.user_id, 'body': message.body}).encode('utf-8'))
 
     return message
+
+
+@router.get("/list")
+async def read(
+    session: PGSessionDep,
+    fire_id: int,
+    offset: int = 0,
+    limit: Annotated[int, Query(le=100)] = 100,
+) -> list[Message]:
+    objects = session.exec(select(Message).where(Message.fire_id == fire_id).offset(offset).limit(limit)).all()
+    return objects

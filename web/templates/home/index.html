@@ -80,14 +80,14 @@
                     </div>
                     <div class="col-lg-9">
                         <input type="file" id="camp-icon" name="camp-icon" class="icon">
-                        <img name="icon-preview" src="" style="display: none;">
+                        <img name="camp-icon-preview" src="" style="display: none;">
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="join();">Join</button>
-                <button type="button" class="btn btn-primary" onclick="create();">Create</button>
+                <button type="button" class="btn btn-primary" onclick="joinCamp();">Join</button>
+                <button type="button" class="btn btn-primary" onclick="createCamp();">Create</button>
             </div>
         </div>
     </div>
@@ -102,22 +102,20 @@
             </div>
             <div class="modal-body">
                 <div class="col-lg-12 row">
+                    <input hidden="true" name="camp" value=""/>
+
                     <div class="col-lg-3">
                         <label for="fire-name">Name: </label>
                     </div>
                     <div class="col-lg-9">
                         <input type="text" id="fire-name" name="fire-name" placeholder="Fire Name" value="first-fire">
                     </div>
-                    <div class="col-lg-9">
-                        <input type="file" id="fire-icon" name="fire-icon" class="icon">
-                        <img name="icon-preview" src="" style="display: none;">
-                    </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="join();">Join</button>
-                <button type="button" class="btn btn-primary" onclick="create();">Create</button>
+                <button type="button" class="btn btn-primary" onclick="joinFire();">Join</button>
+                <button type="button" class="btn btn-primary" onclick="createFire();">Create</button>
             </div>
         </div>
     </div>
@@ -129,18 +127,30 @@
             <button class="add-camp" aria-label="Add Camp" type="button" data-bs-toggle="modal" data-bs-target="#camp-modal">+</button>
         </div>
     </div>
-    <div class="col-lg-9" id="camp-detail">
+    <div class="col-lg-9 row" id="camp-detail">
         <div class="col-lg-3" id="fire-list">
             <button class="add-fire" aria-label="Add Fire" type="button" data-bs-toggle="modal" data-bs-target="#fire-modal">+</button>
         </div>
-        <div class="col-lg-9" id="fire-detail">
+        <div class="col-lg-9 row" id="fire-detail">
+            <div class="col-lg-12 row">
+                <div class="col-lg-3">
+                    <input hidden="true" name="fire">
+                    <input type="text" id="message" name="message" />
+                </div>
+                <div class="col-lg-9">
+                    <button type="button" onclick="sendMessage();">Send</button>
+                </div>
+            </div>
 
+            <div class="col-lg-12 row" id="message-list">
+
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    function join() {
+    function joinCamp() {
         $.ajax({
             type: 'POST',
             url: '/proxy/post',
@@ -148,7 +158,7 @@
                 'controller': 'camp',
                 'action': 'join',
                 'data': {
-                    'name': $('input[name=name]').val()
+                    'name': $('input[name=camp-name]').val()
                 }
             }),
             dataType: 'application/json',
@@ -159,7 +169,7 @@
         });
     }
 
-    function create() {
+    function createCamp() {
         $.ajax({
             type: 'POST',
             url: '/proxy/post',
@@ -167,8 +177,8 @@
                 'controller': 'camp',
                 'action': 'create',
                 'data': {
-                    'name': $('input[name=name]').val(),
-                    'icon': $('img[name=icon-preview]').attr('src')
+                    'name': $('input[name=camp-name]').val(),
+                    'icon': $('img[name=camp-icon-preview]').attr('src')
                 }
             }),
             dataType: 'application/json',
@@ -177,6 +187,101 @@
                 console.log(data);
             }
         });
+    }
+
+    function joinFire(fireId) {
+        $.ajax({
+            type: 'POST',
+            url: '/proxy/post',
+            data: JSON.stringify({
+                'controller': 'fire',
+                'action': 'join',
+                'data': {
+                    'fire_id': fireId
+                }
+            }),
+            dataType: 'application/json',
+            contentType: 'application/json',
+            success: function (data) {
+                console.log(data);
+            }
+        });
+    }
+
+    function createFire() {
+        $.ajax({
+            type: 'POST',
+            url: '/proxy/post',
+            data: JSON.stringify({
+                'controller': 'fire',
+                'action': 'create',
+                'data': {
+                    'camp_id': $('input[name=camp]').val(),
+                    'name': $('input[name=fire-name]').val(),
+                    'type': 1
+                }
+            }),
+            dataType: 'application/json',
+            contentType: 'application/json',
+            success: function (data) {
+                console.log(data);
+            }
+        });
+    }
+
+    function sendMessage() {
+        $.ajax({
+            type: 'POST',
+            url: '/proxy/post',
+            data: JSON.stringify({
+                'controller': 'message',
+                'action': 'create',
+                'data': {
+                    'fire_id': $('input[name=fire]').val(),
+                    'body': $('input[name=message]').val()
+                }
+            }),
+            dataType: 'application/json',
+            contentType: 'application/json',
+            success: function (data) {
+                console.log(data);
+            }
+        });
+    }
+
+    function showMessage(message) {
+        $('#message-list').append(
+            '<div class="col-lg-12">' + message.body + '</div>'
+        )
+    }
+
+    function fireDetail(fireId) {
+        $('input[name=fire]').val(fireId);
+
+        $.ajax({
+            type: 'GET',
+            url: '/proxy/get',
+            data: {
+                'controller': 'message',
+                'action': 'list',
+                'data': JSON.stringify({
+                    'fire_id': fireId
+                })
+            },
+            // dataType: 'application/json',
+            contentType: 'application/json',
+            success: function (data) {
+                $.each(data, function (idx, message) {
+                    showMessage(message);
+                });
+            }
+        });
+    }
+
+    function showFire(fire) {
+        $('#fire-list').append(
+            '<div class="col-lg-12"><button class="add-fire" type="button" onclick="fireDetail(' + fire.id + ')">' + fire.name + '</button></div>'
+        )
     }
 
     function getCampFires(campId) {
@@ -193,19 +298,22 @@
             // dataType: 'application/json',
             contentType: 'application/json',
             success: function (data) {
-                console.log(data);
+                $.each(data, function (idx, fire) {
+                    showFire(fire);
+                });
             }
         });
     }
 
-    function detail(campId) {
-        console.log(campId);
+    function campDetail(campId) {
+        $('input[name=camp]').val(campId);
+
         getCampFires(campId);
     }
 
     function showCamp(camp) {
         $('#camp-list').append(
-            '<div class="col-lg-12"><button class="add-camp" type="button" onclick="detail(' + camp.id + ')"><img src="' + camp.icon + '" style="width: 48px;"/></button></div>'
+            '<div class="col-lg-12"><button class="add-camp" type="button" onclick="campDetail(' + camp.id + ')"><img src="' + camp.icon + '" style="width: 48px;"/></button></div>'
         )
     }
 

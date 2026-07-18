@@ -48,9 +48,10 @@ security = HTTPBearer()
 async def create(
     session: PGSessionDep,
     camp_id: int = Body(...),
-    name: str = Body(...)
+    name: str = Body(...),
+    type: int = Body(...)
 ) -> Fire:
-    fire = Fire(camp_id=camp_id, name=name)
+    fire = Fire(camp_id=camp_id, name=name, type=type)
 
     session.add(fire)
     session.commit()
