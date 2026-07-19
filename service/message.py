@@ -31,6 +31,7 @@ async def run():
 
                 members = await redis_client.smembers(f'fire:{fire}:users')
                 members = [member.decode('utf-8') for member in members]
+                print(members)
                 for member in members:
                     gateway_response = await redis_client.get(f'user:{member}:gateway')
                     if gateway_response is None:

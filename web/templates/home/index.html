@@ -135,7 +135,7 @@
             <div class="col-lg-12 row">
                 <div class="col-lg-3">
                     <input hidden="true" name="fire">
-                    <input type="text" id="message" name="message" />
+                    <input type="text" id="message" name="message"/>
                 </div>
                 <div class="col-lg-9">
                     <button type="button" onclick="sendMessage();">Send</button>
@@ -203,7 +203,6 @@
             dataType: 'application/json',
             contentType: 'application/json',
             success: function (data) {
-                console.log(data);
             }
         });
     }
@@ -257,6 +256,8 @@
 
     function fireDetail(fireId) {
         $('input[name=fire]').val(fireId);
+
+        joinFire(fireId);
 
         $.ajax({
             type: 'GET',
@@ -360,6 +361,16 @@
         }
 
         getUserCamps();
+
+        var socket = new WebSocket("ws://127.0.0.1:5000/gateway");
+
+        socket.addEventListener('message', (event) => {
+            console.log('new message from websocket: ' + event.data);
+        });
+
+        setInterval(() => {
+            socket.send(JSON.stringify({'op': 'HEARTBEAT'}));
+        }, 1000);
     });
 </script>
 

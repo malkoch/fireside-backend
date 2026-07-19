@@ -66,7 +66,8 @@ async def create(
 async def join(
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     session: PGSessionDep,
-    fire_id: int = Body(...)
+    fire_id: int = Body(...),
+    dummy: int = Body(0)
 ):
     token = credentials.credentials
     payload = jwt.decode(token, key=secret.JWT_SECRET_KEY, algorithms=['HS256'])
