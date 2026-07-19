@@ -22,7 +22,13 @@ class CRUDRepository:
             session.exec(insert(self._model).values(**obj))
         session.commit()
 
-    async def read(self, session, query: dict):
+    async def read_one(self, session, query: dict):
+        return session.exec(select(self._model).where(self._get_filter(query))).all()
+
+    async def read_list(self, session, query: dict, offset: int, limit: int):
+        return session.exec(select(self._model).where(self._get_filter(query)).offset(offset).limit(limit)).all()
+
+    async def read_all(self, session, query: dict):
         return session.exec(select(self._model).where(self._get_filter(query))).all()
 
     async def update(self, session, query: dict, command):
