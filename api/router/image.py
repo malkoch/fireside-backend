@@ -52,12 +52,12 @@ async def create(
     return image
 
 
-@router.get("/{camp_id}")
+@router.get("/{owner_id}")
 async def read(
     session: PGSessionDep,
-    camp_id: int
+    owner_id: int
 ) -> Image:
-    image = session.exec(select(Image).where(Image.owner_id == camp_id)).first()
+    image = session.exec(select(Image).where(Image.owner_id == owner_id)).first()
     return image
 
 

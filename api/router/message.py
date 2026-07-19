@@ -7,6 +7,7 @@ from aiokafka import AIOKafkaProducer
 from fastapi import (
     APIRouter,
     Body,
+    HTTPException,
     Query
 )
 from fastapi.params import Depends
@@ -47,6 +48,9 @@ async def create(
     fire_id: int = Body(...),
     body: str = Body(...)
 ) -> Message:
+    if not body:
+        return None
+
     token = credentials.credentials
     payload = jwt.decode(token, key=secret.JWT_SECRET_KEY, algorithms=['HS256'])
 
@@ -70,3 +74,20 @@ async def read(
 ) -> list[Message]:
     objects = session.exec(select(Message).where(Message.fire_id == fire_id).offset(offset).limit(limit)).all()
     return objects
+
+
+@router.delete("/{message_id}")
+async def create(
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    session: PGSessionDep,
+    message_id: int
+):
+    token = credentials.credentials
+    payload = jwt.decode(token, key=secret.JWT_SECRET_KEY, algorithms=['HS256'])
+
+    message = session.exec(select(Message).where(Message.id == message_id)).first()
+    if not message:
+        raise HTTPException(status_code=404, detail="User not found")
+    session.delete(message)
+    session.commit()
+    return {"ok": True}

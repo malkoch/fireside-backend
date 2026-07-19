@@ -16,6 +16,7 @@ from api.router import (
     auth,
     camp,
     fire,
+    image,
     message,
     user
 )
@@ -34,6 +35,7 @@ app = FastAPI()
 app.include_router(auth.router)
 app.include_router(camp.router)
 app.include_router(fire.router)
+app.include_router(image.router)
 app.include_router(message.router)
 app.include_router(user.router)
 

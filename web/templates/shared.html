@@ -54,6 +54,155 @@
         }
     </style>
 
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Inter, Segoe UI, sans-serif;
+        }
+
+        body {
+            background: #1e1f22;
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 1 : 2 : 9 */
+        .app {
+            height: 90vh;
+        }
+
+        /* LEFT */
+        .camp-list {
+            background: #111214;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 0;
+            gap: 12px;
+            border-right: 1px solid #2b2d31;
+        }
+
+        .camp {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: #313338;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: .2s;
+            font-weight: bold;
+        }
+
+        .camp:hover {
+            border-radius: 16px;
+            background: #5865F2;
+        }
+
+        .camp.active {
+            border-radius: 16px;
+            background: #5865F2;
+        }
+
+        .divider {
+            width: 36px;
+            height: 2px;
+            background: #444;
+        }
+
+        .add {
+            color: #3ba55c;
+        }
+
+        /* MIDDLE */
+
+        .camp-detail {
+            background: #2b2d31;
+            border-right: 1px solid #1a1b1e;
+        }
+
+        .camp-title {
+            padding: 18px;
+            font-size: 18px;
+            font-weight: bold;
+            border-bottom: 1px solid #1f2023;
+        }
+
+        .fire-list {
+            padding: 10px;
+        }
+
+        .channel {
+            padding: 10px 12px;
+            margin-bottom: 4px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #c9cccf;
+        }
+
+        .channel:hover {
+            background: #3a3c43;
+        }
+
+        .channel.active {
+            background: #404249;
+            color: white;
+        }
+
+        /* RIGHT */
+
+        .fire-detail {
+            display: flex;
+            flex-direction: column;
+            background: #313338;
+        }
+
+        .chat-header {
+            padding: 18px;
+            font-weight: bold;
+            border-bottom: 1px solid #232428;
+        }
+
+        .messages {
+            flex: 1;
+            overflow: auto;
+            padding: 20px;
+        }
+
+        .message {
+            margin-bottom: 18px;
+        }
+
+        .author {
+            color: #6ea8ff;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .text {
+            color: #ddd;
+        }
+
+        .input {
+            padding: 18px;
+            border-top: 1px solid #232428;
+        }
+
+        .input input {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            outline: none;
+            border-radius: 8px;
+            background: #404249;
+            color: white;
+        }
+    </style>
+
     <script>
         function getCookie(name) {
             const cookies = document.cookie.split(';');

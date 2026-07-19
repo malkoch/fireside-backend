@@ -61,10 +61,11 @@ async def create(
     session.commit()
     session.refresh(camp)
 
-    image = Image(owner_id=camp.id, content=icon)
-    session.add(image)
-    session.commit()
-    session.refresh(image)
+    if icon:
+        image = Image(owner_id=camp.id, content=icon)
+        session.add(image)
+        session.commit()
+        session.refresh(image)
 
     await producer.send('camp.created', json.dumps({'name': camp.name}).encode('utf-8'))
 
@@ -124,7 +125,7 @@ async def read_user_camps(
             id=camp.id,
             name=camp.name,
             users=[camp_user.user_id for camp_user in camp_users],
-            icon=camp_image.content
+            icon=camp_image.content if camp_image else None
         )
         objects.append(user_camp)
     return objects

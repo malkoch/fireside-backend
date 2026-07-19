@@ -1,3 +1,5 @@
+import base64
+
 from fastapi import (
     APIRouter,
     Request,
@@ -6,11 +8,11 @@ from fastapi import (
 from fastapi.responses import (
     RedirectResponse
 )
-from fastapi.templating import Jinja2Templates
+
+from web.core.templates import templates
 
 
 router = APIRouter(prefix="/home")
-templates = Jinja2Templates(directory="web/templates")
 
 
 @router.get("/index")
@@ -65,11 +67,10 @@ async def register(request: Request):
 
     form = await request.form()
 
+    icon = base64.b64encode(await form.get('icon').read()).decode('utf-8')
     username = form.get('username')
     password = form.get('password')
     re_password = form.get('repassword')
-
-    print(f'{username=} {password=} {re_password=}')
 
     if password != re_password:
         return RedirectResponse(
@@ -77,7 +78,7 @@ async def register(request: Request):
             status_code=status.HTTP_303_SEE_OTHER
         )
 
-    response = await call.post('http://127.0.0.1:5000/user/create', {'username': username, 'password': password})
+    response = await call.post('http://127.0.0.1:5000/user/create', {'username': username, 'password': password, 'icon': icon})
 
     response = RedirectResponse(
         url="/home/index",

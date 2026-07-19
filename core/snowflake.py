@@ -3,7 +3,7 @@ import threading
 
 
 class SnowflakeGenerator:
-    EPOCH = int(datetime.datetime(1993, 6, 17, 0, 0, 0, 0).timestamp() * 1000)
+    EPOCH = int(datetime.datetime(2026, 7, 18, 23, 59, 59, 999).timestamp() * 1000)
 
     WORKER_ID_BITS = 10
     SEQUENCE_BITS = 12

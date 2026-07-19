@@ -9,7 +9,7 @@ from web.router import (
     camp,
     fire,
     home,
-    message,
+    image,
     proxy
 )
 
@@ -24,7 +24,7 @@ app = FastAPI()
 app.include_router(camp.router)
 app.include_router(fire.router)
 app.include_router(home.router)
-app.include_router(message.router)
+app.include_router(image.router)
 app.include_router(proxy.router)
 
 app.mount("/web/static", StaticFiles(directory="web/static"), name="static")

@@ -1,29 +1,60 @@
-{% extends "shared.html" %}
-{% block content %}
+<div class="chat-header" id="fire-title">
+    Select Channel
+</div>
+<div class="messages" id="messages">
+    <h2 style="opacity:.5">Choose a channel</h2>
 
-<div class="col-lg-12 row">
-    <input type="text" id="message" name="message" value="aaa"/>
-    <button onclick="sendMessage()">Send</button>
+    {% for message in messages %}
+    <div class="message col-lg-12">
+        <div class="col-lg-1">
+            <img src="/image/{{ message.user_id }}" style="width: 48px;"/>
+        </div>
+        <div class="col-lg-10">
+            <div class="author col-lg-4">{{ message.user_id | user_name }}</div>
+            <div class="author col-lg-8">{{ message.time | datetime }}</div>
+            <div class="text col-lg-12">{{ message.body }}</div>
+        </div>
+        <div class="col-lg-1">
+            <input onclick="deleteMessage('{{ message.id }}')" type="button" value="X" style="width: 100%"/>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<div class="input">
+    <input id="message" name="message" placeholder="Message..." style="width: 85%"/>
+    <input onclick="sendMessage()" type="button" value="Send" style="width: 10%"/>
 </div>
 
 <script>
-    var socket = new WebSocket("ws://127.0.0.1:5000/gateway");
-
-    socket.addEventListener('message', (event) => {
-        console.log('new message from websocket: ' + event.data);
-    });
-
-    setInterval(() => {
-        socket.send(JSON.stringify({'op': 'HEARTBEAT'}));
-    }, 1000);
+    function deleteMessage(messageId) {
+        $.ajax({
+            type: 'DELETE',
+            url: '/proxy/',
+            data: JSON.stringify({
+                'controller': 'message',
+                'action': '' + messageId
+            }),
+            dataType: 'application/json',
+            contentType: 'application/json',
+            success: function (data) {
+                console.log(data);
+            }
+        });
+    }
 
     function sendMessage() {
+        console.log('sending message...');
+
         $.ajax({
             type: 'POST',
-            url: '/message/send',
+            url: '/proxy/post',
             data: JSON.stringify({
-                'fire_id': '{{ fire_id }}',
-                'message': $('#message').val()
+                'controller': 'message',
+                'action': 'create',
+                'data': {
+                    'fire_id': '{{ fire_id }}',
+                    'body': $('#message').val()
+                }
             }),
             dataType: 'application/json',
             contentType: 'application/json',
@@ -33,5 +64,3 @@
         });
     }
 </script>
-
-{% endblock %}

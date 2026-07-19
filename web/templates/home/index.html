@@ -2,171 +2,201 @@
 {% block content %}
 
 <style>
-    .add-camp {
-        width: 56px;
-        height: 56px;
-        border: 2px dashed #4e5058;
-        border-radius: 50%;
-        background: transparent;
+    .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, .72);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .modal-card {
+        width: 460px;
+        background: #313338;
+        border-radius: 16px;
+        padding: 28px;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, .45);
+    }
+
+    .modal-card h2 {
+        margin-bottom: 8px;
+    }
+
+    .subtitle {
         color: #b5bac1;
-        font-size: 30px;
-        font-weight: 300;
-        cursor: pointer;
+        margin-bottom: 22px;
+    }
+
+    .modal-btn {
+        width: 100%;
         display: flex;
         align-items: center;
-        justify-content: center;
-        transition: background-color .2s ease,
-        border-color .2s ease,
-        color .2s ease,
-        transform .15s ease;
-    }
-
-    .add-camp:hover {
-        background: #23a559;
-        border-color: #23a559;
+        justify-content: space-between;
+        padding: 16px;
+        margin-bottom: 12px;
+        border-radius: 10px;
+        background: #2b2d31;
+        border: 1px solid #45474d;
         color: white;
-        transform: scale(1.08);
-    }
-
-    .add-camp:active {
-        transform: scale(0.95);
-    }
-
-    .add-fire {
-        width: 56px;
-        height: 56px;
-        border: 2px dashed #4e5058;
-        border-radius: 50%;
-        background: transparent;
-        color: #b5bac1;
-        font-size: 30px;
-        font-weight: 300;
         cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: background-color .2s ease,
-        border-color .2s ease,
-        color .2s ease,
-        transform .15s ease;
     }
 
-    .add-fire:hover {
-        background: #23a559;
-        border-color: #23a559;
+    .modal-btn span {
+        font-size: 26px;
+    }
+
+    .modal-btn div {
+        flex: 1;
+        margin-left: 16px;
+        text-align: left;
+    }
+
+    .modal-btn:hover {
+        background: #404249;
+    }
+
+    .cancelBtn {
+        margin-top: 10px;
+        width: 100%;
+        padding: 12px;
+        background: none;
+        border: none;
+        color: #b5bac1;
+        cursor: pointer;
+    }
+
+    .modal input {
+        width: 100%;
+        padding: 14px;
+        border-radius: 8px;
+        border: none;
+        background: #1e1f22;
         color: white;
-        transform: scale(1.08);
+        margin-top: 16px;
     }
 
-    .add-fire:active {
-        transform: scale(0.95);
+    .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .primary {
+        background: #5865F2;
+        color: white;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .secondary {
+        background: #4a4d55;
+        color: white;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 8px;
+        cursor: pointer;
     }
 </style>
 
-<div class="modal" id="camp-modal" tabindex="-1" aria-labelledby="camp-modal-label" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="camp-modal-label">Modal title</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="col-lg-12 row">
-                    <div class="col-lg-3">
-                        <label for="camp-name">Name: </label>
-                    </div>
-                    <div class="col-lg-9">
-                        <input type="text" id="camp-name" name="camp-name" placeholder="Camp Name" value="first-camp">
-                    </div>
-                    <div class="col-lg-9">
-                        <input type="file" id="camp-icon" name="camp-icon" class="icon">
-                        <img name="camp-icon-preview" src="" style="display: none;">
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="joinCamp();">Join</button>
-                <button type="button" class="btn btn-primary" onclick="createCamp();">Create</button>
-            </div>
-        </div>
+<div class="app">
+    <!-- LEFT -->
+    <div class="camp-list col-lg-3">
+        <div id="camp-0" class="camp active" onclick="campDetail(0)">🏠</div>
+        <div class="divider"></div>
+        <div id="camp-list"></div>
+        <div style="flex:1"></div>
+        <div class="camp add" onclick="showCampModal();">+</div>
+    </div>
+    <!-- MIDDLE -->
+    <div class="camp-detail col-lg-9">
     </div>
 </div>
 
-<div class="modal" id="fire-modal" tabindex="-1" aria-labelledby="fire-modal-label" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="fire-modal-label">Modal title</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="col-lg-12 row">
-                    <input hidden="true" name="camp" value=""/>
-
-                    <div class="col-lg-3">
-                        <label for="fire-name">Name: </label>
-                    </div>
-                    <div class="col-lg-9">
-                        <input type="text" id="fire-name" name="fire-name" placeholder="Fire Name" value="first-fire">
-                    </div>
+<div id="camp-modal" class="modal hidden">
+    <div class="modal-card">
+        <div id="modalHome">
+            <h2>Create a Server</h2>
+            <p class="subtitle">Create your own server or join an existing one.</p>
+            <button class="modal-btn createBtn" onclick="showCreateCamp();">
+                <span>🛠️</span>
+                <div>
+                    <strong>Create My Own</strong>
+                    <small>Start from scratch</small>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="joinFire();">Join</button>
-                <button type="button" class="btn btn-primary" onclick="createFire();">Create</button>
+                ➜
+            </button>
+            <button class="modal-btn joinBtn" onclick="showJoinCamp();">
+                <span>🔗</span>
+                <div>
+                    <strong>Join a Server</strong>
+                    <small>Use an invite link</small>
+                </div>
+                ➜
+            </button>
+            <button class="cancelBtn" onclick="closeCampModal();">Cancel</button>
+        </div>
+        <div id="joinView" class="hidden">
+            <h2>Join a Server</h2>
+            <p class="subtitle">Enter an invite below.</p>
+            <input id="inviteInput" placeholder="first-camp" value="first-camp">
+            <div class="actions">
+                <button class="secondary backBtn" onclick="closeJoinCamp();">Back</button>
+                <button class="primary" onclick="joinCamp();">Join Server</button>
             </div>
         </div>
-    </div>
-</div>
-
-<div class="col-lg-12 row">
-    <div class="col-lg-3" id="camp-list">
-        <div class="col-lg-12">
-            <button class="add-camp" aria-label="Add Camp" type="button" data-bs-toggle="modal" data-bs-target="#camp-modal">+</button>
-        </div>
-    </div>
-    <div class="col-lg-9 row" id="camp-detail">
-        <div class="col-lg-3" id="fire-list">
-            <button class="add-fire" aria-label="Add Fire" type="button" data-bs-toggle="modal" data-bs-target="#fire-modal">+</button>
-        </div>
-        <div class="col-lg-9 row" id="fire-detail">
-            <div class="col-lg-12 row">
-                <div class="col-lg-3">
-                    <input hidden="true" name="fire">
-                    <input type="text" id="message" name="message"/>
-                </div>
-                <div class="col-lg-9">
-                    <button type="button" onclick="sendMessage();">Send</button>
-                </div>
-            </div>
-
-            <div class="col-lg-12 row" id="message-list">
-
+        <div id="createView" class="hidden">
+            <h2>Create Your Server</h2>
+            <input id="serverName" placeholder="first-camp" value="first-camp">
+            <input class="form-control icon" name="icon" placeholder="Icon" type="file">
+            <img name="icon-preview" src="" style="display: none;">
+            <div class="actions">
+                <button class="secondary backBtn" onclick="closeCreateCamp();">Back</button>
+                <button class="primary" onclick="createCamp();">Create</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    function joinCamp() {
-        $.ajax({
-            type: 'POST',
-            url: '/proxy/post',
-            data: JSON.stringify({
-                'controller': 'camp',
-                'action': 'join',
-                'data': {
-                    'name': $('input[name=camp-name]').val()
-                }
-            }),
-            dataType: 'application/json',
-            contentType: 'application/json',
-            success: function (data) {
-                console.log(data);
-            }
-        });
+    function showCampModal() {
+        $('#camp-modal').removeClass('hidden');
+    }
+
+    function closeCampModal() {
+        $('#camp-modal').addClass('hidden');
+    }
+
+    function showCreateCamp() {
+        $('#modalHome').addClass('hidden');
+
+        $('#createView').removeClass('hidden');
+    }
+
+    function closeCreateCamp() {
+        $('#modalHome').removeClass('hidden');
+
+        $('#createView').addClass('hidden');
+    }
+
+    function showJoinCamp() {
+        $('#modalHome').addClass('hidden');
+
+        $('#joinView').removeClass('hidden');
+    }
+
+    function closeJoinCamp() {
+        $('#modalHome').removeClass('hidden');
+
+        $('#joinView').addClass('hidden');
     }
 
     function createCamp() {
@@ -177,144 +207,57 @@
                 'controller': 'camp',
                 'action': 'create',
                 'data': {
-                    'name': $('input[name=camp-name]').val(),
-                    'icon': $('img[name=camp-icon-preview]').attr('src')
+                    'name': $('#serverName').val(),
+                    'icon': $('img[name=icon-preview]').attr('src')
                 }
             }),
             dataType: 'application/json',
             contentType: 'application/json',
             success: function (data) {
-                console.log(data);
             }
         });
     }
 
-    function joinFire(fireId) {
+    function joinCamp() {
         $.ajax({
             type: 'POST',
             url: '/proxy/post',
             data: JSON.stringify({
-                'controller': 'fire',
+                'controller': 'camp',
                 'action': 'join',
                 'data': {
-                    'fire_id': fireId
+                    'name': $('#inviteInput').val()
                 }
             }),
             dataType: 'application/json',
             contentType: 'application/json',
             success: function (data) {
-            }
-        });
-    }
-
-    function createFire() {
-        $.ajax({
-            type: 'POST',
-            url: '/proxy/post',
-            data: JSON.stringify({
-                'controller': 'fire',
-                'action': 'create',
-                'data': {
-                    'camp_id': $('input[name=camp]').val(),
-                    'name': $('input[name=fire-name]').val(),
-                    'type': 1
-                }
-            }),
-            dataType: 'application/json',
-            contentType: 'application/json',
-            success: function (data) {
-                console.log(data);
-            }
-        });
-    }
-
-    function sendMessage() {
-        $.ajax({
-            type: 'POST',
-            url: '/proxy/post',
-            data: JSON.stringify({
-                'controller': 'message',
-                'action': 'create',
-                'data': {
-                    'fire_id': $('input[name=fire]').val(),
-                    'body': $('input[name=message]').val()
-                }
-            }),
-            dataType: 'application/json',
-            contentType: 'application/json',
-            success: function (data) {
-                console.log(data);
-            }
-        });
-    }
-
-    function showMessage(message) {
-        $('#message-list').append(
-            '<div class="col-lg-12">' + message.body + '</div>'
-        )
-    }
-
-    function fireDetail(fireId) {
-        $('input[name=fire]').val(fireId);
-
-        joinFire(fireId);
-
-        $.ajax({
-            type: 'GET',
-            url: '/proxy/get',
-            data: {
-                'controller': 'message',
-                'action': 'list',
-                'data': JSON.stringify({
-                    'fire_id': fireId
-                })
-            },
-            // dataType: 'application/json',
-            contentType: 'application/json',
-            success: function (data) {
-                $.each(data, function (idx, message) {
-                    showMessage(message);
-                });
-            }
-        });
-    }
-
-    function showFire(fire) {
-        $('#fire-list').append(
-            '<div class="col-lg-12"><button class="add-fire" type="button" onclick="fireDetail(' + fire.id + ')">' + fire.name + '</button></div>'
-        )
-    }
-
-    function getCampFires(campId) {
-        $.ajax({
-            type: 'GET',
-            url: '/proxy/get',
-            data: {
-                'controller': 'fire',
-                'action': 'list',
-                'data': JSON.stringify({
-                    'camp_id': campId
-                })
-            },
-            // dataType: 'application/json',
-            contentType: 'application/json',
-            success: function (data) {
-                $.each(data, function (idx, fire) {
-                    showFire(fire);
-                });
             }
         });
     }
 
     function campDetail(campId) {
-        $('input[name=camp]').val(campId);
+        $('.camp.active').removeClass('active');
+        $('#camp-' + campId).addClass('active');
 
-        getCampFires(campId);
+        if (campId == 0) {
+
+        } else {
+            $.ajax({
+                type: 'GET',
+                url: '/camp/detail?camp_id=' + campId,
+                // dataType: 'application/json',
+                contentType: 'application/json',
+                success: function (data) {
+                    $('.camp-detail').html(data);
+                }
+            });
+        }
     }
 
     function showCamp(camp) {
         $('#camp-list').append(
-            '<div class="col-lg-12"><button class="add-camp" type="button" onclick="campDetail(' + camp.id + ')"><img src="' + camp.icon + '" style="width: 48px;"/></button></div>'
+            '<div id="camp-' + camp.id + '" class="camp" onclick="campDetail(' + camp.id + ')"><img src="/image/' + camp.id + '" style="width: 48px;"/></div>'
         )
     }
 

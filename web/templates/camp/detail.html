@@ -1,65 +1,77 @@
-{% extends "shared.html" %}
-{% block content %}
-
-<div class="col-lg-12 row">
-    <div class="col-lg-6">
-        <label for="name">Name: </label>
-        <input type="text" id="name" name="name" value="first-fire" style="width: 90%;"/>
+<div class="col-lg-3">
+    <div class="camp-title" id="camp-title">
+        Home
     </div>
-    <div class="col-lg-6">
-        <button type="button" onclick="create();">Create</button>
+    <div class="fire-list" id="fire-list">
+        {% for fire in fires %}
+        <div id="channel-{{ fire.id }}" class="channel" onclick="fireDetail('{{ fire.id }}')">
+            {{ fire.name }}
+        </div>
+        {% endfor %}
+
+        <div class="channel add" onclick="showFireModal();">New Channel</div>
     </div>
 </div>
 
-{% for fire in fires %}
-<div class="col-lg-12 row">
-    <div class="col-lg-6">
-        {{ fire.name }}
-    </div>
+<!-- RIGHT -->
+<div class="fire-detail col-lg-9">
+</div>
 
-    <div class="col-lg-6">
-        <button type="button" onclick="join('{{ fire.id }}')">Join</button>
-        <button type="button" onclick="detail('{{ fire.id }}')">Detail</button>
+<div id="fire-modal" class="modal hidden">
+    <div class="modal-card">
+        <div id="modalHome">
+            <h2>Create Your Fire</h2>
+            <p class="subtitle">Create your own server or join an existing one.</p>
+            <input id="channelName" placeholder="first-fire" value="first-fire">
+            <div class="actions">
+                <button class="primary" onclick="createFire();">Create</button>
+                <button class="cancelBtn" onclick="closeFireModal();">Cancel</button>
+            </div>
+        </div>
     </div>
 </div>
-{% endfor %}
 
 <script>
-    function create() {
+    function showFireModal() {
+        $('#fire-modal').removeClass('hidden');
+    }
+
+    function closeFireModal() {
+        $('#fire-modal').addClass('hidden');
+    }
+
+    function createFire() {
         $.ajax({
             type: 'POST',
-            url: '/fire/create',
+            url: '/proxy/post',
             data: JSON.stringify({
-                'camp_id': '{{ camp_id }}',
-                'name': $('#name').val(),
-                'type': 1
+                'controller': 'fire',
+                'action': 'create',
+                'data': {
+                    'camp_id': '{{ camp_id }}',
+                    'name': $('#channelName').val(),
+                    'type': 1
+                }
             }),
             dataType: 'application/json',
             contentType: 'application/json',
             success: function (data) {
-                window.location.reload();
             }
         });
     }
 
-    function join(fireId) {
+    function fireDetail(fireId) {
+        $('.channel.active').removeClass('active');
+        $('#channel-' + fireId).addClass('active');
+
         $.ajax({
-            type: 'POST',
-            url: '/fire/join',
-            data: JSON.stringify({
-                'fire_id': fireId
-            }),
-            dataType: 'application/json',
+            type: 'GET',
+            url: '/fire/detail?fire_id=' + fireId,
+            // dataType: 'application/json',
             contentType: 'application/json',
             success: function (data) {
-                window.location.reload();
+                $('.fire-detail').html(data);
             }
         });
-    }
-
-    function detail(fireId) {
-        window.open('/fire/detail?fire_id=' + fireId, '_blank');
     }
 </script>
-
-{% endblock %}

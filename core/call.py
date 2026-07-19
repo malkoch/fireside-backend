@@ -29,3 +29,15 @@ async def get(url: str, data: dict, token: str = ''):
     except Exception as ex:
         print(str(ex))
         return None
+
+
+async def delete(url: str, token: str = ''):
+    try:
+        if token:
+            response = requests.delete(url, headers={'Authorization': f'Bearer {token}', 'Content-Type': 'application/json', 'Accept': 'application/json'})
+        else:
+            response = requests.delete(url, headers={'Content-Type': 'application/json', 'Accept': 'application/json'})
+        return json.loads(response.content.decode('utf-8'))
+    except Exception as ex:
+        print(str(ex))
+        return None

@@ -10,6 +10,7 @@ from fastapi import (
 from sqlmodel import select
 
 from core.session import PGSessionDep
+from model.image import Image
 from model.user import User
 
 
@@ -20,7 +21,8 @@ router = APIRouter(prefix="/user")
 async def create_user(
     session: PGSessionDep,
     username: str = Body(...),
-    password: str = Body(...)
+    password: str = Body(...),
+    icon: str = Body(...)
 ) -> User:
     user = User(
         username=username,
@@ -30,6 +32,13 @@ async def create_user(
     session.add(user)
     session.commit()
     session.refresh(user)
+
+    if icon:
+        image = Image(owner_id=user.id, content=icon)
+        session.add(image)
+        session.commit()
+        session.refresh(image)
+
     return user
 
 

@@ -6,15 +6,17 @@
 <!------ Include the above in your HEAD tag ---------->
 
 <style>
-    .register-container{
+    .register-container {
         margin-top: 5%;
         margin-bottom: 5%;
     }
-    .register-logo{
+
+    .register-logo {
         position: relative;
         margin-left: -41.5%;
     }
-    .register-logo img{
+
+    .register-logo img {
         position: absolute;
         width: 20%;
         margin-top: 19%;
@@ -22,34 +24,39 @@
         border-radius: 4.5rem;
         padding: 5%;
     }
-    .register-form{
+
+    .register-form {
         padding: 9%;
-        background:#282726;
+        background: #282726;
         box-shadow: 0 5px 8px 0 rgba(0, 0, 0, 0.2), 0 9px 26px 0 rgba(0, 0, 0, 0.19);
     }
-    .register-form h3{
+
+    .register-form h3 {
         text-align: center;
-        margin-bottom:12%;
-        color:#fff;
+        margin-bottom: 12%;
+        color: #fff;
     }
-    .btnSubmit{
+
+    .btnSubmit {
         font-weight: 600;
         width: 50%;
         color: #282726;
         background-color: #fff;
         border: none;
         border-radius: 1.5rem;
-        padding:2%;
+        padding: 2%;
         width: 100%;
     }
-    .btnForgetPwd{
+
+    .btnForgetPwd {
         color: #fff;
         font-weight: 600;
         text-decoration: none;
     }
-    .btnForgetPwd:hover{
-        text-decoration:none;
-        color:#fff;
+
+    .btnForgetPwd:hover {
+        text-decoration: none;
+        color: #fff;
     }
 </style>
 
@@ -58,7 +65,10 @@
         <div class="col-md-12 register-form">
             <h3>Login Form 1</h3>
 
-            <form action="/home/register" method="post">
+            <form action="/home/register" method="post" id="form">
+                <div class="form-group">
+                    <input class="icon" name="icon" type="file" id="file">
+                </div>
                 <div class="form-group">
                     <input name="username" type="text" class="form-control" placeholder="Your Username *" value="malkoch"/>
                 </div>
@@ -78,4 +88,21 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById("form").onsubmit = async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(document.getElementById("form"));
+        formData.append("icon", document.getElementById("file").files[0]);
+        console.log(formData);
+
+        const res = await fetch("/home/register", {
+            method: "POST",
+            body: formData,
+        });
+
+        console.log(await res.json());
+    };
+</script>
 {% endblock %}

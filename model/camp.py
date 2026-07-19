@@ -34,4 +34,4 @@ class UserCamp(BaseModel):
     id: int
     name: str
     users: list[int]
-    icon: str
+    icon: str | None
