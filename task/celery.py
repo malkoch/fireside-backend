@@ -14,3 +14,4 @@ celery.conf.beat_schedule = {
     }
 }
 celery.conf.imports = ('task.sync', 'task.user',)
+celery.conf.result_expires = 60

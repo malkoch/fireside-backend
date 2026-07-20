@@ -12,6 +12,16 @@ from sqlmodel import select
 from core import secret
 from core.secret import JWT_SECRET_KEY
 from core.session import PGSessionDep
+from model.permission import (
+    EPermission,
+    EPermissionType,
+    Permission
+)
+from model.role import (
+    ERoleType,
+    MemberRole,
+    Role
+)
 from model.user import (
     User,
     UserRefreshToken
@@ -36,10 +46,19 @@ async def authenticate(
     if db_user.password != password:
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
+    permissions = session.exec(select(Permission).where(Permission.owner_id == db_user.id)).all()
+    permissions = list(map(lambda x: f'{EPermissionType(x.type).name}.{EPermission(x.permission).name}', permissions))
+
+    roles = session.exec(select(MemberRole).where(MemberRole.owner_id == db_user.id)).all()
+    for role in roles:
+        role.role_type = session.exec(select(Role).where(Role.id == role.role)).first()
+    roles = list(map(lambda x: f'{ERoleType(x.role_type.type).name}.{x.role_type.name}', roles))
+
     access = jwt.encode(
         {
             'user': db_user.id,
-            'role': 'user',
+            'roles': roles,
+            'permissions': permissions,
             'type': 'access',
             'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30),
             'iat': datetime.datetime.utcnow()
@@ -49,7 +68,6 @@ async def authenticate(
     ref = jwt.encode(
         {
             'user': db_user.id,
-            'role': 'user',
             'type': 'refresh',
             'exp': datetime.datetime.utcnow() + datetime.timedelta(days=30),
             'iat': datetime.datetime.utcnow()

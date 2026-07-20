@@ -109,15 +109,20 @@
 
 <div class="app">
     <!-- LEFT -->
-    <div class="camp-list col-lg-3">
+    <div class="camp-list col-lg-3" style="height: 100%;">
         <div id="camp-0" class="camp active" onclick="campDetail(0)">🏠</div>
         <div class="divider"></div>
         <div id="camp-list"></div>
-        <div style="flex:1"></div>
         <div class="camp add" onclick="showCampModal();">+</div>
+        <div style="flex:1"></div>
+        <div>
+            {% if request.session['user'] %}
+            {{request.session['user']['Name']}} {{request.session['user']['Surname']}}
+            {% endif %}
+        </div>
     </div>
     <!-- MIDDLE -->
-    <div class="camp-detail col-lg-9">
+    <div class="camp-detail col-lg-9" style="height: 100%;">
     </div>
 </div>
 

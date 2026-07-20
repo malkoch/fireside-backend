@@ -67,6 +67,12 @@ async def create(
         session.commit()
         session.refresh(image)
 
+    camp_member = CampMember(camp_id=camp.id, user_id=payload['user'])
+
+    session.add(camp_member)
+    session.commit()
+    session.refresh(camp_member)
+
     await producer.send('camp.created', json.dumps({'name': camp.name}).encode('utf-8'))
 
     return camp

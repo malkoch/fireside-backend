@@ -96,6 +96,7 @@
             cursor: pointer;
             transition: .2s;
             font-weight: bold;
+            margin: 10px;
         }
 
         .camp:hover {
@@ -175,6 +176,11 @@
 
         .message {
             margin-bottom: 18px;
+            margin-top: 18px;
+        }
+
+        .message:hover {
+            background: #3a3c43;
         }
 
         .author {
@@ -353,7 +359,6 @@
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="/camp/index">Camps</a></li>
                             <li><a class="dropdown-item" href="/home/logout">Logout</a></li>
                             {% else %}
                             <li><a class="dropdown-item" href="/home/login-page">Login</a></li>
