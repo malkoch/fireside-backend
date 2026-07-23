@@ -10,7 +10,6 @@ from fastapi import (
 )
 from fastapi.middleware.cors import CORSMiddleware
 from redis import asyncio as redis
-from sqlmodel import SQLModel
 
 from api.router import (
     auth,
@@ -21,14 +20,9 @@ from api.router import (
     user
 )
 from core import secret
+from core.init import create_db_and_tables
 from core.secret import GATEWAY_ID
 from core.websocket import manager
-
-
-def create_db_and_tables():
-    from core.session import postgresql_engine
-
-    SQLModel.metadata.create_all(postgresql_engine)
 
 
 app = FastAPI()

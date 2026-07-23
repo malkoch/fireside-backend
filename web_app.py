@@ -2,9 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from sqlmodel import SQLModel
 from starlette.middleware.sessions import SessionMiddleware
 
+from core.init import create_db_and_tables
 from web.router import (
     camp,
     fire,
@@ -13,11 +13,6 @@ from web.router import (
     proxy
 )
 
-
-def create_db_and_tables():
-    from core.session import postgresql_engine
-
-    SQLModel.metadata.create_all(postgresql_engine)
 
 
 app = FastAPI()

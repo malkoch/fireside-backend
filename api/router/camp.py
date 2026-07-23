@@ -17,6 +17,7 @@ from fastapi.security import (
 )
 from sqlmodel import select
 
+from api.auth import get_user
 from core import secret
 from core.session import PGSessionDep
 from model.camp import (
@@ -48,24 +49,33 @@ security = HTTPBearer()
 
 @router.post("/create")
 async def create(
+    user: Annotated[int, Depends(get_user)],
+    name: str = Body(...),
+    icon: str = Body(...)
+):
+    await producer.send(
+        'camp.create',
+        json.dumps(
+            {
+                'user': user,
+                'name': name,
+                'icon': icon
+            }
+        ).encode('utf-8')
+    )
+
+
+@router.post("/join")
+async def join(
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     session: PGSessionDep,
     name: str = Body(...),
-    icon: str = Body(...)
-) -> Camp:
+    dummy: int = Body(0)
+) -> CampMember:
     token = credentials.credentials
     payload = jwt.decode(token, key=secret.JWT_SECRET_KEY, algorithms=['HS256'])
 
-    camp = Camp(name=name, creator_id=payload['user'])
-    session.add(camp)
-    session.commit()
-    session.refresh(camp)
-
-    if icon:
-        image = Image(owner_id=camp.id, content=icon)
-        session.add(image)
-        session.commit()
-        session.refresh(image)
+    camp = session.exec(select(Camp).where(Camp.name == name)).first()
 
     camp_member = CampMember(camp_id=camp.id, user_id=payload['user'])
 
@@ -73,13 +83,13 @@ async def create(
     session.commit()
     session.refresh(camp_member)
 
-    await producer.send('camp.created', json.dumps({'name': camp.name}).encode('utf-8'))
+    await producer.send('camp.user.joined', json.dumps({'camp': camp_member.camp_id, 'user': camp_member.user_id}).encode('utf-8'))
 
-    return camp
+    return camp_member
 
 
-@router.post("/join")
-async def join(
+@router.post("/leave")
+async def leave(
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     session: PGSessionDep,
     name: str = Body(...),

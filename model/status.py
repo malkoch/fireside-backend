@@ -1,8 +1,8 @@
 import datetime
 import enum
 
+from sqlalchemy import BIGINT
 from sqlmodel import (
-    BIGINT,
     Field,
     SQLModel
 )
@@ -19,6 +19,8 @@ class EStatus(enum.Enum):
 
 
 class Status(SQLModel, table=True):
+    __tablename__ = 'status'
+
     id: int | None = Field(default_factory=generator(1), primary_key=True, sa_type=BIGINT)
     owner_id: int = Field(sa_type=BIGINT)
     user_id: int | None = Field(sa_type=BIGINT)

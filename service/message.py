@@ -7,7 +7,7 @@ from redis import asyncio as redis
 async def run():
     consumer = AIOKafkaConsumer(
         'message.created',
-        bootstrap_servers='localhost:9092', group_id='1', auto_offset_reset='earliest'
+        bootstrap_servers='localhost:9092', group_id='1'
     )
     redis_client = redis.Redis(host='localhost', port=6379)
 

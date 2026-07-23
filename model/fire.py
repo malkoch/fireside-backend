@@ -1,10 +1,12 @@
 import datetime
 import enum
 
-from sqlmodel import (
+from sqlalchemy import (
     BIGINT,
+    Index
+)
+from sqlmodel import (
     Field,
-    Index,
     SQLModel
 )
 
@@ -17,6 +19,8 @@ class FireType(enum.Enum):
 
 
 class Fire(SQLModel, table=True):
+    __tablename__ = 'fire'
+
     __table_args__ = (
         Index('unique_fire_name_index', 'camp_id', 'name', unique=True),
     )
@@ -29,6 +33,8 @@ class Fire(SQLModel, table=True):
 
 
 class FireMember(SQLModel, table=True):
+    __tablename__ = 'fire_member'
+
     __table_args__ = (
         Index('unique_fire_member_index', 'fire_id', 'user_id', unique=True),
     )

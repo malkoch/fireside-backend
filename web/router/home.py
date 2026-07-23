@@ -78,7 +78,7 @@ async def register(request: Request):
             status_code=status.HTTP_303_SEE_OTHER
         )
 
-    response = await call.post('http://127.0.0.1:5000/user/create', {'username': username, 'password': password, 'icon': icon})
+    response = await call.post('http://127.0.0.1:5000/user/register', {'username': username, 'password': password, 'icon': icon})
 
     response = RedirectResponse(
         url="/home/index",

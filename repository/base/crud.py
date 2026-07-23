@@ -1,9 +1,11 @@
-from sqlmodel import (
-    and_,
+from sqlalchemy import (
     delete,
     insert,
-    select,
     update
+)
+from sqlmodel import (
+    and_,
+    select,
 )
 
 
@@ -33,6 +35,8 @@ class CRUDRepository:
 
     async def update(self, session, query: dict, command):
         session.exec(update(self._model).where(self._get_filter(query)).values(**command))
+        session.commit()
 
     async def delete(self, session, query: dict):
         session.exec(delete(self._model).where(self._get_filter(query)))
+        session.commit()

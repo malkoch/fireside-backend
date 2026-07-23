@@ -19,8 +19,7 @@ from model.permission import (
 )
 from model.role import (
     ERoleType,
-    MemberRole,
-    Role
+    Role, UserRole
 )
 from model.user import (
     User,
@@ -100,7 +99,7 @@ async def refresh(
     db_token = session.exec(select(UserRefreshToken).where(UserRefreshToken.user_id == user_id)).first()
     if not db_token:
         raise ValueError('refresh token not found')
-    if db_token.refresh_token != hashlib.sha256(ref.encode('utf-8')).hexdigest():
+    if db_token.token != hashlib.sha256(ref.encode('utf-8')).hexdigest():
         raise ValueError('refresh token not found')
 
     access = jwt.encode(
